@@ -1,0 +1,9 @@
+Cython==0.29.15
+git+https://github.com/chrodan/joblib.git
+matplotlib==2.2.5
+# mlabwrap 1.1
+numpy==1.16.6
+tensorboard==2.1.0
+tensorflow==2.1.0
+tensorflow-estimator==2.1.0
+tensorflow-probability-0.9.0

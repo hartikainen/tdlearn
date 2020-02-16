@@ -1,0 +1,10 @@
+name: tdlearn
+channels:
+- defaults
+- conda-forge
+dependencies:
+- python>=2.7,<3
+- pip>=19.3
+- conda>=4.7
+- pip:
+    - -r ./requirements.txt
