@@ -397,11 +397,21 @@ class LinearValuePredictionTask(object):
 
                 for k, m in enumerate(methods):
                     if self.off_policy:
-                        rhos[i] = self.target_policy.p(s[i], a[i], mean=m_a_tar[i]) / self.behavior_policy.p(s[i], a[i], mean=m_a_beh[i])
-                        rhos2[i] = self.target_policy.p(s[i], a2[i], mean=m_a_tar[i]) / self.behavior_policy.p(s[i], a2[i], mean=m_a_beh[i])
-                        m.update_V(s[i], s_n[i], r[i],
-                                   rho=rhos[i], rhot=rhos2[i],
-                                   f0=f0, f1=f1, f1t=f1t, s1t=s_n[i], rt=r2[i])
+                        if isinstance(m, td.BBO):
+                            # Call update_V_offpolicy directly due to different
+                            # api.
+                            m.update_V_offpolicy(
+                                s[i], s_n[i], r[i], a[i],
+                                self.behavior_policy, self.target_policy,
+                                f0=f0, f1=f1,
+                                s1t=s_n[i],
+                                rt=r2[i],)
+                        else:
+                            rhos[i] = self.target_policy.p(s[i], a[i], mean=m_a_tar[i]) / self.behavior_policy.p(s[i], a[i], mean=m_a_beh[i])
+                            rhos2[i] = self.target_policy.p(s[i], a2[i], mean=m_a_tar[i]) / self.behavior_policy.p(s[i], a2[i], mean=m_a_beh[i])
+                            m.update_V(s[i], s_n[i], r[i],
+                                       rho=rhos[i], rhot=rhos2[i],
+                                       f0=f0, f1=f1, f1t=f1t, s1t=s_n[i], rt=r2[i])
                     else:
                         m.update_V(s[i], s_n[i], r[i],
                                    f0=f0, f1=f1, s1t=s_n2[i], f1t=f1t, rt=r2[i])
