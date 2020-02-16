@@ -6,12 +6,14 @@ import os
 import numpy as np
 import util
 
+
 @util.memory.cache(hashfun={"policy": repr})
 def mean_action_trajectory(policy, states):
     ret = np.empty((states.shape[0], policy.dim_A))
     for i in xrange(states.shape[0]):
         ret[i] = policy.mean(states[i])
     return ret
+
 
 class NoisyContinuous(object):
 
@@ -35,7 +37,7 @@ class NoisyContinuous(object):
             return m + noise
 
     def p(self, s, a, mean=None):
-        m_a = mean -a if mean is not None else self.mean(s) - a
+        m_a = mean - a if mean is not None else self.mean(s) - a
         return np.exp(-.5 * (m_a * m_a * self.precision).sum()) / \
             ((2 * np.pi) ** (float(self.dim_A) / 2)) / np.sqrt(
                 self.approx_noise.sum())
@@ -70,7 +72,7 @@ class Discrete(object):
         self.dim_S, self.dim_A = self.tab.shape
 
     def __call__(self, s):
-        return  util.multinomial_sample(1, self.tab[int(s), :])
+        return util.multinomial_sample(1, self.tab[int(s), :])
 
     def mean(self, s):
         return np.sum(self.tab[int(s),:] * np.arange(self.dim_A))
@@ -87,6 +89,8 @@ class DiscreteUniform(Discrete):
 
 
 os.environ["MLABRAW_CMD_STR"] = "matlab -nosplash -nodesktop -nodisplay -nojvm"
+
+
 class MarcsPolicy(NoisyContinuous):
     """Policy with interfaces with the PILCO implementation in Matlab to
     run execute a policy learned with PILCO
