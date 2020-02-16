@@ -7,12 +7,16 @@ this code.
 """
 __author__ = "Christoph Dann <cdann@cdann.de>"
 
+import tensorflow as tf
 import numpy as np
 import itertools
 import logging
 import copy
 import time
 import util
+
+import policies
+import bbo
 
 
 class ValueFunctionPredictor(object):
@@ -132,12 +136,147 @@ class OffPolicyValueFunctionPredictor(ValueFunctionPredictor):
                 numpy array of shape (n_s, n_a)
                 *_pi(s,a) is the probability of taking action a in state s
         """
+
         rho = target_pi.p(s0, a) / beh_pi.p(s0, a)
         kwargs["rho"] = rho
         if not np.isfinite(rho):
             import ipdb
             ipdb.set_trace()
         return self.update_V(s0, s1, r, f0=f0, f1=f1, theta=theta, **kwargs)
+
+
+class BBO(LinearValueFunctionPredictor, OffPolicyValueFunctionPredictor):
+    def __init__(self, alpha, *args, **kwargs):
+        """TODO(hartikainen)."""
+        LinearValueFunctionPredictor.__init__(self, *args, **kwargs)
+        OffPolicyValueFunctionPredictor.__init__(self, *args, **kwargs)
+
+        self.uncertainty_model = bbo.OnlineUncertaintyModel()
+
+        self.init_vals['alpha'] = alpha
+        # input_shapes = (phi.dim, )
+        # self.uncertainty_model = bbo.OnlineUncertaintyModel(input_shapes)
+
+    def clone(self):
+        o = self.__class__(
+            self.init_vals['alpha'], gamma=self.gamma, phi=self.phi)
+        return o
+
+    def __getstate__(self):
+        res = self.__dict__.copy()
+        for n in ("alpha", ):
+            if isinstance(res[n], itertools.repeat):
+                res[n] = res[n].next()
+
+        uncertainty_model = res.pop('uncertainty_model')
+        res['uncertainty_model'] = {
+            'config': {'D': tf.size(uncertainty_model.mu_hat).numpy()},
+            'weights': uncertainty_model.get_weights()
+        }
+        return res
+
+    def __setstate__(self, state):
+        uncertainty_model_state = state.pop('uncertainty_model')
+        uncertainty_model = bbo.OnlineUncertaintyModel()
+        D = uncertainty_model_state['config']['D']
+        uncertainty_model(np.zeros((1, D)))
+        weights = uncertainty_model_state['weights']
+
+        uncertainty_model.set_weights(weights)
+
+        state['uncertainty_model'] = uncertainty_model
+
+        self.__dict__ = state.copy()
+        self.alpha = self._assert_iterator(self.init_vals['alpha'])
+
+    def reset(self):
+        LinearValueFunctionPredictor.reset(self)
+
+        if self.uncertainty_model.built:
+            self.uncertainty_model.reset()
+        else:
+            self.uncertainty_model(np.zeros(self.phi.dim + 1)[None, ...])
+
+        self.alpha = self._assert_iterator(self.init_vals['alpha'])
+        self.w = np.zeros_like(self.init_vals['theta'])
+        if hasattr(self, "A"):
+            del(self.A)
+        if hasattr(self, "b"):
+            del(self.b)
+
+        if hasattr(self, "F"):
+            del(self.F)
+        if hasattr(self, "Cmat"):
+            del(self.Cmat)
+
+    def init_deterministic(self, task):
+        import ipdb; ipdb.set_trace(context=30)
+        raise NotImplementedError("TODO(hartikainen)")
+
+        self.F, self.Cmat, self.b = self._compute_detTD_updates(task)
+        self.A = np.array(self.F - self.Cmat)
+
+    def update_V_offpolicy(
+        self, s0, s1, r, a, beh_pi, target_pi, f0=None, f1=None, theta=None,
+            **kwargs):
+        """
+        off policy training version for transition (s0, a, s1) with reward r
+        which was sampled by following the behaviour policy beh_pi.
+        The parameters are learned for the target policy target_pi
+
+         beh_pi, target_pi: S x A -> R
+                numpy array of shape (n_s, n_a)
+                *_pi(s,a) is the probability of taking action a in state s
+        """
+        if theta is None:
+            theta = self.theta
+
+        if f0 is None or f1 is None:
+            f0 = self.phi(s0)
+            f1 = self.phi(s1)
+
+        if not isinstance(target_pi, policies.Discrete):
+            raise NotImplementedError(
+                "TODO(hartikainen): This needs to be reimplemented for"
+                "continuous action spaces")
+
+        b_N = np.concatenate((f0, a))[None, ...].astype(np.float32)
+
+        random_a = np.random.randint(target_pi.dim_A, size=1)
+        np.testing.assert_equal(random_a.shape, a.shape)
+        b_hat = np.concatenate((f0, random_a))[None, ...].astype(np.float32)
+
+        a1 = target_pi(s1)[None]
+        np.testing.assert_equal(a1.shape, a.shape)
+        b_N_0 = np.concatenate((f1, a1))[None, ...].astype(np.float32)
+
+        inputs = (b_N, b_hat, b_N_0, self.gamma)
+
+        self.uncertainty_model.online_update(inputs)
+
+        Delta_N = self.uncertainty_model.Delta_N
+        Sigma_N = self.uncertainty_model.Sigma_N
+        Sigma_hat = self.uncertainty_model.Sigma_hat
+
+        delta = r + self.gamma * np.dot(theta, f1) - np.dot(theta, f0)
+
+        # MSBBE_gradient = 2 * Delta_N * Sigma_N * Sigma_hat * Sigma_N * delta_omega_i
+        MSBBE_gradient = tf.reduce_mean(
+            tf.einsum(
+                'ij,jk,kl,lm,bm,bX->bi',
+                Delta_N,
+                Sigma_N,
+                Sigma_hat,
+                Sigma_N,
+                np.concatenate((f0, a))[tf.newaxis, ...],
+                delta.reshape(1, 1),
+            ), axis=0)[:-1]
+
+        self.theta -= self.alpha.next() * MSBBE_gradient.numpy()
+
+    def update_V(self, s0, s1, r, f0=None, f1=None, rho=1, theta=None, **kwargs):
+        import ipdb; ipdb.set_trace(context=30)
+        raise NotImplementedError("TODO(hartikainen)")
 
 
 class GTDBase(LinearValueFunctionPredictor, OffPolicyValueFunctionPredictor):

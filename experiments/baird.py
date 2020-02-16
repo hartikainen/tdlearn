@@ -32,6 +32,13 @@ task = LinearDiscreteValuePredictionTask(mdp, gamma, phi,
                                          target_policy=target_pol)
 
 alpha = 0.004
+bbo = td.BBO(alpha, phi=phi)
+bbo.name = r"BBO".format()
+bbo.color = "black"
+methods.append(bbo)
+
+
+alpha = 0.004
 mu = 4
 gtd = td.GTD(alpha=alpha, beta=mu * alpha, phi=phi)
 gtd.name = r"GTD $\alpha$={} $\mu$={}".format(alpha, mu)
