@@ -154,6 +154,7 @@ class BBO(LinearValueFunctionPredictor, OffPolicyValueFunctionPredictor):
         self.uncertainty_model = bbo.OnlineUncertaintyModel()
 
         self.init_vals['alpha'] = alpha
+        self.alpha = self._assert_iterator(self.init_vals['alpha'])
         # input_shapes = (phi.dim, )
         # self.uncertainty_model = bbo.OnlineUncertaintyModel(input_shapes)
 
@@ -169,23 +170,26 @@ class BBO(LinearValueFunctionPredictor, OffPolicyValueFunctionPredictor):
                 res[n] = res[n].next()
 
         uncertainty_model = res.pop('uncertainty_model')
-        res['uncertainty_model'] = {
-            'config': {'D': tf.size(uncertainty_model.mu_hat).numpy()},
-            'weights': uncertainty_model.get_weights()
-        }
+        if hasattr(uncertainty_model, 'mu_hat'):
+            res['uncertainty_model'] = {
+                'config': {'D': tf.size(uncertainty_model.mu_hat).numpy()},
+                'weights': uncertainty_model.get_weights()
+            }
         return res
 
     def __setstate__(self, state):
-        uncertainty_model_state = state.pop('uncertainty_model')
-        uncertainty_model = bbo.OnlineUncertaintyModel()
-        D = uncertainty_model_state['config']['D']
-        uncertainty_model(np.zeros((1, D)))
-        weights = uncertainty_model_state['weights']
+        if hasattr(state, 'uncertainty_model'):
+            uncertainty_model_state = state.pop('uncertainty_model')
+            uncertainty_model = bbo.OnlineUncertaintyModel()
+            D = uncertainty_model_state['config']['D']
+            uncertainty_model(np.zeros((1, D)))
+            weights = uncertainty_model_state['weights']
 
-        uncertainty_model.set_weights(weights)
+            uncertainty_model.set_weights(weights)
+        else:
+            uncertainty_model = bbo.OnlineUncertaintyModel()
 
         state['uncertainty_model'] = uncertainty_model
-
         self.__dict__ = state.copy()
         self.alpha = self._assert_iterator(self.init_vals['alpha'])
 
