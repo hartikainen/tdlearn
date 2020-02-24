@@ -51,8 +51,7 @@ class OnlineUncertaintyModel(tf.keras.Model):
         return epistemic_uncertainty
 
     @tf.function(experimental_relax_shapes=True)
-    def online_update(self, inputs):
-        b_N, b_hat, b_N_not, gamma = inputs
+    def online_update(self, b_N, b_hat, b_N_next, gamma):
         N = tf.shape(b_N)[0]
         tf.debugging.assert_equal(N, 1)
 
@@ -82,7 +81,7 @@ class OnlineUncertaintyModel(tf.keras.Model):
         self.Sigma_N.assign(Sigma_N)
 
         Delta_N_delta = tf.matmul(
-            (gamma * b_N_not - b_N), b_N, transpose_a=True)
+            (gamma * b_N_next - b_N), b_N, transpose_a=True)
         self.Delta_N.assign_add(Delta_N_delta)
 
         mu_hat = (

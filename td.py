@@ -252,11 +252,9 @@ class BBO(LinearValueFunctionPredictor, OffPolicyValueFunctionPredictor):
 
         a1 = target_pi(s1)[None]
         np.testing.assert_equal(a1.shape, a.shape)
-        b_N_0 = np.concatenate((f1, a1))[None, ...].astype(np.float32)
+        b_N_next = np.concatenate((f1, a1))[None, ...].astype(np.float32)
 
-        inputs = (b_N, b_hat, b_N_0, self.gamma)
-
-        self.uncertainty_model.online_update(inputs)
+        self.uncertainty_model.online_update(b_N, b_hat, b_N_next, self.gamma)
 
         Delta_N = self.uncertainty_model.Delta_N
         Sigma_N = self.uncertainty_model.Sigma_N
