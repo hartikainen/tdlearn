@@ -166,10 +166,22 @@ episodic = False
 error_every = 80
 name = "disc_random_off"
 title = "4. {}-State Random MDP Off-policy".format(n, n_indep)
+# criterion = "RMSE"
 criterion = "RMSPBE"
-criteria = ["RMSPBE", "RMSBE", "RMSE"]
+criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
+
+
 if __name__ == "__main__":
-    from experiments import *
-    mean, std, raw = run_experiment(n_jobs=-1, **globals())
-    save_results(**globals())
-    #plot_errorbar(**globals())
+    if True:
+        from experiments import run_experiment, save_results, plot_errorbar
+        mean, std, raw = run_experiment(n_jobs=1, **globals())
+        save_results(**globals())
+        plot_errorbar(**globals())
+    else:
+        from experiments import load_results, plot_errorbar
+        data = load_results(name)
+        data['criterion'] = criterion
+        plot_errorbar(**data)
+
+    for m in methods:
+        print(m, m.time)

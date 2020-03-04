@@ -138,17 +138,28 @@ brm.name = "BRM"
 brm.color = "b"
 methods.append(brm)
 
-l=50000
-error_every=500
-n_indep=50
+l = 50000
+error_every = 500
+n_indep = 50
 n_eps = 1
-episodic=False
-criteria = ["RMSPBE", "RMSBE", "RMSE"]
-criterion="RMSPBE"
+episodic = False
+criterion = "RMSPBE"
+criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
 title = "12. 20-link Lin. Pole Balancing Off-pol."
-name="link20_imp_offpolicy"
-if __name__ =="__main__":
-    from experiments import *
-    mean, std, raw = run_experiment(n_jobs=-1, **globals())
-    save_results(**globals())
-    #plot_errorbar(**globals())
+name = "link20_imp_offpolicy"
+
+
+if __name__ == "__main__":
+    if True:
+        from experiments import run_experiment, save_results, plot_errorbar
+        mean, std, raw = run_experiment(n_jobs=-1, **globals())
+        save_results(**globals())
+        plot_errorbar(**globals())
+    else:
+        from experiments import load_results, plot_errorbar
+        data = load_results(name)
+        data['criterion'] = criterion
+        plot_errorbar(**data)
+
+    for m in methods:
+        print(m, m.time)

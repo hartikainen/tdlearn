@@ -96,13 +96,21 @@ error_every = 50
 name = "corrupted"
 n_indep = 3
 title = "{}-State Corrupted Chain ({} trials)".format(n, n_indep)
-criterion = "RMSE"
-criteria = ["RMSPBE", "RMSBE", "RMSE"]
+criterion = "RMSPBE"
+criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
+
 
 if __name__ == "__main__":
-    from experiments import *
-    mean, std, raw = run_experiment(n_jobs=-2, **globals())
-    #save_results(**globals())
-    plot_errorbar(**globals())
+    if True:
+        from experiments import run_experiment, save_results, plot_errorbar
+        mean, std, raw = run_experiment(n_jobs=-2, verbose=4, **globals())
+        save_results(**globals())
+        plot_errorbar(**globals())
+    else:
+        from experiments import load_results, plot_errorbar
+        data = load_results(name)
+        data['criterion'] = criterion
+        plot_errorbar(**data)
+
     for m in methods:
-        print m, m.time
+        print(m, m.time)

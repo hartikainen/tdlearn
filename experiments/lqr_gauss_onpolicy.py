@@ -159,16 +159,24 @@ l = 15000
 error_every = 500
 n_indep = 1
 n_eps = 1
-episodic=False
-criteria = ["RMSPBE", "RMSBE"]
+episodic = False
 criterion = "RMSPBE"
+criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
 name = "lqr_gauss_onpolicy"
 title = "4-dim. State Pole Balancing Onpolicy"
 
 
 if __name__ == "__main__":
-    from experiments import *
-    task.mu
-    mean, std, raw = run_experiment(n_jobs=1, verbose=4, **globals())
-    save_results(**globals())
-    plot_errorbar(**globals())
+    if True:
+        from experiments import run_experiment, save_results, plot_errorbar
+        mean, std, raw = run_experiment(n_jobs=1, verbose=4, **globals())
+        save_results(**globals())
+        plot_errorbar(**globals())
+    else:
+        from experiments import load_results, plot_errorbar
+        data = load_results(name)
+        data['criterion'] = criterion
+        plot_errorbar(**data)
+
+    for m in methods:
+        print(m, m.time)

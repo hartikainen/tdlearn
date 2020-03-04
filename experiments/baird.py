@@ -32,8 +32,8 @@ task = LinearDiscreteValuePredictionTask(mdp, gamma, phi,
                                          target_policy=target_pol)
 
 alpha = 0.004
-bbo = td.BBO(alpha, phi=phi)
-bbo.name = r"BBO".format()
+bbo = td.BBOV2(alpha, phi=phi)
+bbo.name = r"BBOV2".format()
 bbo.color = "black"
 methods.append(bbo)
 
@@ -138,11 +138,21 @@ episodic = False
 name = "baird"
 title = "2. Baird Star Example"
 criterion = "RMSPBE"
-criteria = ["RMSPBE", "RMSBE", "RMSE"]
+criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
 gs_errorevery = 10
 
+
 if __name__ == "__main__":
-    from .experiments import *
-    mean, std, raw = run_experiment(n_jobs=1, **globals())
-    save_results(**globals())
-    # plot_errorbar(**globals())
+    if True:
+        from experiments import run_experiment, save_results, plot_errorbar
+        mean, std, raw = run_experiment(n_jobs=1, **globals())
+        save_results(**globals())
+        plot_errorbar(**globals())
+    else:
+        from experiments import load_results, plot_errorbar
+        data = load_results(name)
+        data['criterion'] = criterion
+        plot_errorbar(**data)
+
+    for m in methods:
+        print(m, m.time)

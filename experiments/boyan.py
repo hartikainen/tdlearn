@@ -145,15 +145,25 @@ n_eps = 100
 episodic = True
 error_every = 1
 name = "boyan"
-n_indep = 20
+n_indep = 200
 title = "1. 14-State Boyan Chain".format(n, n_indep)
 criterion = "RMSPBE"
-criteria = ["RMSPBE", "RMSBE", "RMSE"]
+criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
 
 gs_errorevery = 1
 
 if __name__ == "__main__":
-    from experiments import *
-    mean, std, raw = run_experiment(n_jobs=1, **globals())
-    save_results(**globals())
-    #plot_errorbar(**globals())
+    if True:
+        from experiments import run_experiment, save_results, plot_errorbar
+        mean, std, raw = run_experiment(n_jobs=1, **globals())
+        save_results(**globals())
+        plot_errorbar(**globals())
+    else:
+        from experiments import load_results, plot_errorbar
+        data = load_results(name)
+        data['criterion'] = criterion
+        # data['criteria'] = criteria
+        plot_errorbar(**data)
+
+    for m in methods:
+        print(m, m.time)

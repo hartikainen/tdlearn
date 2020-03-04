@@ -170,18 +170,28 @@ title = "9. Cart-Pole Swinup On-policy"
 n_indep = 50
 episodic = False
 criterion = "RMSPBE"
-criteria = ["RMSPBE", "RMSBE", "RMSE"]
-eval_on_traces=False
-n_samples_eval=10000
-verbose=1
+criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
+eval_on_traces = False
+n_samples_eval = 10000
+verbose = 1
 gs_ignore_first_n = 10000
 gs_max_weight = 3.
+
+
 if __name__ == "__main__":
-    from experiments import *
-    task.mu
-    #task.set_mu_from_trajectory(n_samples=l, n_eps=n_eps, verbose=4.,
-    #            seed=0,
-    #            n_samples_eval=10000)
-    mean, std, raw = run_experiment(n_jobs=25, **globals())
-    save_results(**globals())
-    #plot_errorbar(**globals())
+    if True:
+        from experiments import run_experiment, save_results, plot_errorbar
+        task.set_mu_from_trajectory(n_samples=l, n_eps=n_eps, verbose=4.,
+                                    seed=0,
+                                    n_samples_eval=10000)
+        mean, std, raw = run_experiment(n_jobs=25, verbose=4, **globals())
+        save_results(**globals())
+        plot_errorbar(**globals())
+    else:
+        from experiments import load_results, plot_errorbar
+        data = load_results(name)
+        data['criterion'] = criterion
+        plot_errorbar(**data)
+
+    for m in methods:
+        print(m, m.time)
