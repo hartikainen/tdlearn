@@ -287,11 +287,9 @@ class BBOV2(BBO):
                 res[n] = res[n].next()
 
         uncertainty_model = res.pop('uncertainty_model')
-        if hasattr(uncertainty_model, 'mu_hat'):
-            import ipdb; ipdb.set_trace(context=30)
-
+        if hasattr(uncertainty_model, 'rho'):
             res['uncertainty_model'] = {
-                'config': {'D': tf.size(uncertainty_model.mu_hat).numpy()},
+                'config': {'D': tf.size(uncertainty_model.rho).numpy()},
                 'weights': uncertainty_model.get_weights()
             }
         return res
@@ -307,7 +305,7 @@ class BBOV2(BBO):
 
             uncertainty_model.set_weights(weights)
         else:
-            uncertainty_model = bbo.OnlineUncertaintyModel()
+            uncertainty_model = bbo.OnlineUncertaintyModelV2()
 
         state['uncertainty_model'] = uncertainty_model
         self.__dict__ = state.copy()
@@ -327,12 +325,8 @@ class BBOV2(BBO):
         b_hat = np.concatenate((f0, ))[None, ...].astype(np.float32)
         b_N_next = np.concatenate((f1, ))[None, ...].astype(np.float32)
 
-        try:
-            self.uncertainty_model.online_update(
-                b_N, b_hat, b_N_next, self.gamma, tf.constant(r, dtype=b_N.dtype))
-        except Exception as e:
-            import ipdb; ipdb.set_trace(context=30)
-            pass
+        self.uncertainty_model.online_update(
+            b_N, b_hat, b_N_next, self.gamma, tf.constant(r, dtype=b_N.dtype))
 
         C_inverse = self.uncertainty_model.C_inverse
         rho = self.uncertainty_model.rho
