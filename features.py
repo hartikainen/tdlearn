@@ -167,6 +167,10 @@ class squared_tri(object):
         b = theta[-1]
         p = theta[:-1]
         l = 1 if len(p) == 1 else (-1 + np.sqrt(1 + 8 * len(p))) / 2
+
+        assert int(l) == l, (type(l), l)
+        l = int(l)
+
         iu = np.triu_indices(l)
         il = np.tril_indices(l)
         a = np.empty((l, l))
