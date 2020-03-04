@@ -15,7 +15,8 @@ def batch_quadratic_form(W, inputs):
 
 
 class OnlineUncertaintyModel(tf.keras.Model):
-    def build(self, input_shapes):
+    def build(self, input_shapes, sigma_0=1.0):
+        self.sigma_0 = sigma_0
         D = sum(input_shape[-1] for input_shape in tree.flatten(input_shapes))
         self.mu_hat = self.add_weight(
             'mu_hat', shape=(1, D), initializer=tf.initializers.zeros)
@@ -55,7 +56,7 @@ class OnlineUncertaintyModel(tf.keras.Model):
         N = tf.shape(b_N)[0]
         tf.debugging.assert_equal(N, 1)
 
-        variance = 1.0
+        variance = self.sigma_0
         b_b_T = tf.matmul(b_N, b_N, transpose_a=True)
 
         def initialize_Sigma_N():
@@ -104,6 +105,88 @@ class OnlineUncertaintyModel(tf.keras.Model):
             * tf.reduce_mean(b_hat_b_hat_T, axis=0))
 
         self.Sigma_hat.assign(Sigma_hat)
+
+        self.N.assign_add(N)
+
+        return True
+
+    def get_diagnostics(self):
+        diagnostics = OrderedDict((
+            ('N', self.N.numpy()),
+            ('epistemic_uncertainty', self(True).numpy()),
+        ))
+        return diagnostics
+
+
+class OnlineUncertaintyModelV2(tf.keras.Model):
+    def build(self, input_shapes, sigma_0=1.0):
+        self.sigma_0 = sigma_0
+        D = sum(input_shape[-1] for input_shape in tree.flatten(input_shapes))
+        self.C_inverse = self.add_weight(
+            'C_inverse', shape=(D, D), initializer=tf.initializers.identity)
+        self.rho = self.add_weight(
+            'rho', shape=(1, D), initializer=tf.initializers.zeros)
+        self.Delta_N = self.add_weight(
+            'Delta_N', shape=(D, D), initializer=tf.initializers.zeros)
+        self.N = self.add_weight(
+            'N', shape=(), dtype=tf.int32, initializer=tf.initializers.zeros)
+
+    def reset(self):
+        self.C_inverse.assign(tf.eye(*self.C_inverse.shape))
+        self.rho.assign(tf.zeros_like(self.rho))
+        self.Delta_N.assign(tf.zeros_like(self.Delta_N))
+        self.N.assign(tf.zeros_like(self.N))
+
+    @tf.function(experimental_relax_shapes=True)
+    def call(self, inputs):
+        return 0.0
+
+    @tf.function(experimental_relax_shapes=True)
+    def online_update(self, b_N, b_hat, b_N_next, gamma, reward):
+        N = tf.shape(b_N)[0]
+        tf.debugging.assert_equal(N, 1)
+
+        variance = self.sigma_0
+
+        Delta = gamma * b_N_next - b_N
+
+        def initialize_C_inverse():
+            C = (
+                tf.cast(
+                    tf.matmul(b_N, gamma * b_N_next - b_N, transpose_a=True),
+                    tf.float64)
+                - variance * tf.eye(
+                    tf.shape(self.C_inverse)[-1], dtype=tf.float64))
+
+            # TODO(hartikainen): For some reason cholesky fails here.
+            # cholesky = tf.linalg.cholesky(tf.cast(C, tf.float64))
+            # C_inverse = tf.linalg.cholesky_solve(
+            #     cholesky,
+            #     tf.eye(tf.shape(self.C_inverse)[-1], dtype=tf.float64))
+
+            C_inverse = tf.linalg.inv(C)
+
+            return tf.cast(C_inverse, tf.float32)
+
+        def update_C_inverse():
+            Delta_C_inverse = tf.matmul(Delta, self.C_inverse)
+            C_inverse_delta = - 1.0 * tf.matmul(
+                tf.matmul(self.C_inverse, b_N, transpose_b=True),
+                Delta_C_inverse
+            ) / (1.0 + tf.matmul(Delta_C_inverse, b_N, transpose_b=True))
+
+            C_inverse = self.C_inverse + C_inverse_delta
+            return C_inverse
+
+        C_inverse = tf.cond(
+            tf.equal(self.N, 0),
+            initialize_C_inverse,
+            update_C_inverse)
+
+        self.C_inverse.assign(C_inverse)
+
+        rho_delta = b_N * reward
+        self.rho.assign_add(rho_delta)
 
         self.N.assign_add(N)
 
