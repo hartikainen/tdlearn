@@ -151,26 +151,36 @@ def replace_title(exp, data):
 
 
 def plot_errorbar(title, methods, mean, std, l, error_every, criterion,
-                  criteria, n_eps, episodic=False, ncol=1, figsize=(15, 10), **kwargs):
-    plt.figure(figsize=(15, 10))
-    plt.ylabel(criterion)
-    plt.xlabel("Timesteps")
-    plt.title(title)
+                  criteria, n_eps, episodic=False, ncol=1, figsize=(7.5, 5), **kwargs):
+    max_items_per_row = 3
+    rows = int(np.ceil(len(criteria) / max_items_per_row))
+    figsize = (figsize[0] * max_items_per_row, figsize[1] * rows)
+    # figsize = (figsize[0] * len(criteria), figsize[1])
+    figure, axes = plt.subplots(rows, max_items_per_row, figsize=figsize)
 
-    k = criteria.index(criterion)
-    x = range(0, l * n_eps, error_every) if not episodic else range(n_eps)
-    if episodic:
-        ee = int(n_eps / 8.)
-    else:
-        ee = int(l * n_eps / error_every / 8.)
-    if ee < 1:
-        ee = 1
-    lss = ["-", "--", "-."]
-    for i, m in enumerate(methods):
-        if hasattr(m, "hide") and m.hide:
-            continue
-        ls = lss[int(i / 7)]
-        plt.errorbar(x, mean[i, k, :], yerr=std[i, k, :],
-                     errorevery=ee, label=m.name, ls=ls)
-    plt.legend(ncol=ncol)
-    plt.show()
+    for axis, criterion in zip(axes.flat, criteria):
+        # plt.figure(figsize=(15, 10))
+        axis.set_ylabel(criterion)
+        axis.set_xlabel("Timesteps")
+        axis.set_title(title)
+
+        k = criteria.index(criterion)
+        x = range(0, l * n_eps, error_every) if not episodic else range(n_eps)
+        if episodic:
+            ee = int(n_eps / 8.)
+        else:
+            ee = int(l * n_eps / error_every / 8.)
+        if ee < 1:
+            ee = 1
+        lss = ["-", "--", "-."]
+        for i, m in enumerate(methods):
+            if hasattr(m, "hide") and m.hide:
+                continue
+            ls = lss[int(i / 7)]
+
+            axis.errorbar(x, mean[i, k, :], yerr=std[i, k, :],
+                          errorevery=ee, label="{}, error sum={}".format(m.name, np.sum(mean[i, k, :])), ls=ls)
+        axis.legend(ncol=ncol)
+        # plt.show()
+    figure.tight_layout()
+    plt.savefig('data/{name}/errorbar.png'.format(name=kwargs['name']))
