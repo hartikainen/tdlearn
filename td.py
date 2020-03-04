@@ -233,6 +233,8 @@ class BBO(LinearValueFunctionPredictor, OffPolicyValueFunctionPredictor):
             f0 = self.phi(s0)
             f1 = self.phi(s1)
 
+        self._tic()
+
         b_N = np.concatenate((f0, ))[None, ...].astype(np.float32)
         b_hat = np.concatenate((f0, ))[None, ...].astype(np.float32)
         b_N_next = np.concatenate((f1, ))[None, ...].astype(np.float32)
@@ -257,6 +259,10 @@ class BBO(LinearValueFunctionPredictor, OffPolicyValueFunctionPredictor):
             ), axis=0)
 
         self.theta -= self.alpha.next() * rho * MSBBE_gradient.numpy()
+
+        self._toc()
+
+        return self.theta
 
 
 class BBOV2(BBO):
@@ -315,6 +321,8 @@ class BBOV2(BBO):
             f0 = self.phi(s0)
             f1 = self.phi(s1)
 
+        self._tic()
+
         b_N = np.concatenate((f0, ))[None, ...].astype(np.float32)
         b_hat = np.concatenate((f0, ))[None, ...].astype(np.float32)
         b_N_next = np.concatenate((f1, ))[None, ...].astype(np.float32)
@@ -330,6 +338,10 @@ class BBOV2(BBO):
         rho = self.uncertainty_model.rho
         self.theta[:] = - 1.0 * tf.squeeze(
             tf.matmul(C_inverse, rho, transpose_b=True))
+
+        self._toc()
+
+        return self.theta
 
 
 class GTDBase(LinearValueFunctionPredictor, OffPolicyValueFunctionPredictor):
