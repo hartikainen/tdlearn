@@ -156,13 +156,17 @@ def plot_errorbar(title, methods, mean, std, l, error_every, criterion,
     rows = int(np.ceil(len(criteria) / max_items_per_row))
     figsize = (figsize[0] * max_items_per_row, figsize[1] * rows)
     # figsize = (figsize[0] * len(criteria), figsize[1])
-    figure, axes = plt.subplots(rows, max_items_per_row, figsize=figsize)
+    figure, axes = plt.subplots(
+        rows,
+        max_items_per_row,
+        figsize=figsize,
+        constrained_layout=True)
 
-    for axis, criterion in zip(axes.flat, criteria):
-        # plt.figure(figsize=(15, 10))
+    for (index, axis), criterion in zip(np.ndenumerate(axes), criteria):
+        if index[0] == axes.shape[0] - 1:
+            axis.set_xlabel("Timesteps")
+
         axis.set_ylabel(criterion)
-        axis.set_xlabel("Timesteps")
-        axis.set_title(title)
 
         k = criteria.index(criterion)
         x = range(0, l * n_eps, error_every) if not episodic else range(n_eps)
@@ -178,9 +182,24 @@ def plot_errorbar(title, methods, mean, std, l, error_every, criterion,
                 continue
             ls = lss[int(i / 7)]
 
+            # label = "{}, error sum={}".format(m.name, np.sum(mean[i, k, :]))
+            label = m.name
             axis.errorbar(x, mean[i, k, :], yerr=std[i, k, :],
-                          errorevery=ee, label="{}, error sum={}".format(m.name, np.sum(mean[i, k, :])), ls=ls)
-        axis.legend(ncol=ncol)
-        # plt.show()
-    figure.tight_layout()
-    plt.savefig('data/{name}/errorbar.png'.format(name=kwargs['name']))
+                          errorevery=ee, label=label, ls=ls)
+
+    title = figure.suptitle(title, y=1.05)
+
+    handles, labels = axis.get_legend_handles_labels()
+    legend = figure.legend(
+        handles,
+        labels,
+        bbox_to_anchor=(0.0, 0.0, 1.0, 0.9),
+        framealpha=1.0,
+        ncol=5,
+    )
+
+    plt.savefig(
+        'data/{name}/errorbar.png'.format(name=kwargs['name']),
+        bbox_extra_artists=(legend, title),
+        bbox_inches='tight',
+    )
