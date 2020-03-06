@@ -13,7 +13,7 @@ import features
 import policies
 from task import LinearLQRValuePredictionTask
 
-dim=30
+dim = 20
 gamma = 0.95
 sigma = np.ones(2*dim)*1.
 dt = 0.1
@@ -125,8 +125,8 @@ episodic=False
 verbose=10
 criteria = ["RMSPBE", "RMSBE", "RMSE"]
 criterion = "RMSPBE"
-name = "link30_full_onpolicy"
-title = "13. 30-link Lin. Pole Balancing On-pol."
+name = "link20_full_onpolicy"
+title = "11. {}-link Lin. Pole Balancing On-pol.".format(dim)
 
 
 if __name__ == "__main__":
