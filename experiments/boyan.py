@@ -18,6 +18,9 @@ gamma = .95
 p0 = np.zeros(n_feat)
 task = LinearDiscreteValuePredictionTask(mdp, gamma, phi, p0)
 
+# import tensorflow as tf
+# tf.config.experimental_run_functions_eagerly(True)
+
 # define the methods to examine
 gtd2 = td.GTD2(alpha=0.5, beta=0.5, phi=phi)
 gtd2.name = "GTD2"
@@ -28,6 +31,15 @@ gtd.name = "GTD"
 gtd.color = "#6E086D"
 
 methods = []
+
+alpha = 0.1
+bbo = td.BBOV2(
+    alpha,
+    D_a=1,
+    phi=phi)
+bbo.name = r"BBO $\alpha$={}".format(alpha)
+bbo.color = "black"
+methods.append(bbo)
 
 alpha = .5
 mu = 2.
@@ -155,14 +167,15 @@ gs_errorevery = 1
 if __name__ == "__main__":
     if True:
         from experiments import run_experiment, save_results, plot_errorbar
-        mean, std, raw = run_experiment(n_jobs=1, **globals())
+        mean, std, raw = run_experiment(n_jobs=4, **globals())
         save_results(**globals())
         plot_errorbar(**globals())
     else:
-        from experiments import load_results, plot_errorbar
+        from experiments import load_results, plot_errorbar, filter_methods
         data = load_results(name)
         data['criterion'] = criterion
         # data['criteria'] = criteria
+        filter_methods(data)
         plot_errorbar(**data)
 
     for m in methods:

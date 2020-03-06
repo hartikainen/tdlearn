@@ -120,13 +120,14 @@ if __name__ == "__main__":
                                     n_samples_eval=10000)
         errors = task.regularization_paths(methods, n_samples=l, n_eps=1, seed=0,
                                            criteria=criteria, verbose=4)
-        mean, std, raw = run_experiment(n_jobs=25, verbose=4, **globals())
+        mean, std, raw = run_experiment(n_jobs=8, verbose=4, **globals())
         save_results(**globals())
         plot_errorbar(**globals())
     else:
-        from experiments import load_results, plot_errorbar
+        from experiments import load_results, plot_errorbar, filter_methods
         data = load_results(name)
         data['criterion'] = criterion
+        filter_methods(data)
         plot_errorbar(**data)
 
     for m in methods:

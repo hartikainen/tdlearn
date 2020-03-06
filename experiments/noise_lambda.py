@@ -62,7 +62,7 @@ def lambda_errors(phi, lambdas, noises):
         d = globals().copy()
         d["phi"] = phi
         d["task"] = task
-        mean, std, raw = run_experiment(n_jobs=-1, **d)
+        mean, std, raw = run_experiment(n_jobs=4, **d)
         val = mean[:, -1, n:]
         val[mean[:, -1, n:] > mean[0, -1, 0]] = mean[0, -1, 0]
         val = val.mean(axis=1)

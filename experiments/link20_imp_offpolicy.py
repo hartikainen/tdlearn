@@ -31,6 +31,18 @@ task = LinearLQRValuePredictionTask(mdp, gamma, phi, theta0, policy=policy, mu_n
                                     target_policy=target_policy, normalize_phi=True)
 
 methods = []
+
+
+alpha = 1.0
+bbo = td.BBOV2(
+    alpha,
+    D_a=target_policy.dim_A,
+    phi=phi)
+bbo.name = r"BBO $\alpha$={}".format(alpha)
+bbo.color = "black"
+methods.append(bbo)
+
+
 alpha = 0.003
 mu = 16.
 gtd = td.GTD(alpha=alpha, beta=mu * alpha, phi=phi)
@@ -152,13 +164,14 @@ name = "link20_imp_offpolicy"
 if __name__ == "__main__":
     if True:
         from experiments import run_experiment, save_results, plot_errorbar
-        mean, std, raw = run_experiment(n_jobs=-1, **globals())
+        mean, std, raw = run_experiment(n_jobs=2, **globals())
         save_results(**globals())
         plot_errorbar(**globals())
     else:
-        from experiments import load_results, plot_errorbar
+        from experiments import load_results, plot_errorbar, filter_methods
         data = load_results(name)
         data['criterion'] = criterion
+        filter_methods(data)
         plot_errorbar(**data)
 
     for m in methods:

@@ -25,6 +25,19 @@ task = LinearDiscreteValuePredictionTask(mdp, gamma, phi, np.zeros(phi.dim),
 
 
 methods = []
+
+# import tensorflow as tf
+# tf.config.experimental_run_functions_eagerly(True)
+
+alpha = 0.03
+bbo = td.BBOV2(
+    alpha,
+    D_a=tar_pol.dim_A,
+    phi=phi)
+bbo.name = r"BBO $\alpha$={}".format(alpha)
+bbo.color = "black"
+methods.append(bbo)
+
 alpha = 0.007
 mu = .0001
 gtd = td.GTD(alpha=alpha, beta=mu * alpha, phi=phi)
@@ -178,9 +191,10 @@ if __name__ == "__main__":
         save_results(**globals())
         plot_errorbar(**globals())
     else:
-        from experiments import load_results, plot_errorbar
+        from experiments import load_results, plot_errorbar, filter_methods
         data = load_results(name)
         data['criterion'] = criterion
+        filter_methods(data)
         plot_errorbar(**data)
 
     for m in methods:

@@ -13,12 +13,13 @@ import features
 import policies
 from task import LinearLQRValuePredictionTask
 
-dim=30
+dim=20
 gamma = 0.95
 sigma = np.ones(2*dim)*1.
 dt = 0.1
 mdp = examples.NLinkPendulumMDP(np.ones(dim)*.5, np.ones(dim)*.6, sigma=sigma, dt=dt)
-phi = features.squared_tri(dim*(dim+1)/2+1)
+phi = features.squared_diag(2*dim)
+# phi = features.squared_tri(dim*(dim+1)/2+1)
 
 
 n_feat = len(phi(np.zeros(mdp.dim_S)))
@@ -35,6 +36,18 @@ task = LinearLQRValuePredictionTask(mdp, gamma, phi, theta0,
 
 
 methods = []
+
+
+alpha = 1.0
+bbo = td.BBOV2(
+    alpha,
+    D_a=beh_policy.dim_A,
+    phi=phi)
+bbo.name = r"BBO $\alpha$={}".format(alpha)
+bbo.color = "black"
+methods.append(bbo)
+
+
 alpha = 0.0005
 mu = 2.
 gtd = td.GTD(alpha=alpha, beta=mu * alpha, phi=phi)
@@ -125,20 +138,21 @@ episodic = False
 verbose = 10
 criterion = "RMSPBE"
 criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
-name = "link30_full_onpolicy"
-title = "13. 30-link Lin. Pole Balancing On-pol."
+name = "link20_imp_onpolicy"
+title = "11. 20-link Lin. Pole Balancing On-pol."
 
 
 if __name__ == "__main__":
     if True:
         from experiments import run_experiment, save_results, plot_errorbar
-        mean, std, raw = run_experiment(n_jobs=-1, verbose=4, **globals())
+        mean, std, raw = run_experiment(n_jobs=4, **globals())
         save_results(**globals())
         plot_errorbar(**globals())
     else:
-        from experiments import load_results, plot_errorbar
+        from experiments import load_results, plot_errorbar, filter_methods
         data = load_results(name)
         data['criterion'] = criterion
+        filter_methods(data)
         plot_errorbar(**data)
 
     for m in methods:
