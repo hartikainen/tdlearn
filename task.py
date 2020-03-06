@@ -95,6 +95,7 @@ class LinearValuePredictionTask(object):
             for seed in range(n_indep):
                 kwargs = kwargs.copy()
                 kwargs['seed'] = seed
+                kwargs['verbose'] = True
                 #self.projection_operator()
                 jobs.append((tmp, [self, methods], kwargs))
             res = Parallel(n_jobs=n_jobs, verbose=verbose)(jobs)
