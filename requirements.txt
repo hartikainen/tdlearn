@@ -1,4 +1,5 @@
 Cython==0.29.15
+dm-tree==0.13.0
 git+https://github.com/chrodan/joblib.git
 matplotlib==2.2.5
 # mlabwrap 1.1
