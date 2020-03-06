@@ -150,6 +150,28 @@ def replace_title(exp, data):
     return data
 
 
+def filter_methods(data):
+    max_ys = np.median(np.max(data['mean'], axis=-1), axis=0) * 5.0
+
+    for i, method in enumerate(data['methods']):
+        if np.any(max_ys < np.max(data['mean'][i, ...], axis=-1)):
+            method.hide = True
+            print("hiding: ", method.name)
+        else:
+            print("not hiding: ", method.name)
+        print(max_ys < np.max(data['mean'][i, ...], axis=-1))
+        print(max_ys)
+        print(np.max(data['mean'][i, ...], axis=-1))
+
+        # names_to_filter = {'TD(0.0)', 'FPKF(0.0)', 'LSTD-JP(0)', 'LSPE(0.0)'}
+        # for method in data['methods']:
+        #     if any(name in method.name for name in names_to_filter):
+        #         method.hide = True
+        #         print("hiding: ", method.name)
+        #     else:
+        #         print("not hiding: ", method.name)
+
+
 def plot_errorbar(title, methods, mean, std, l, error_every, criterion,
                   criteria, n_eps, episodic=False, ncol=1, figsize=(7.5, 5), **kwargs):
     max_items_per_row = 3
@@ -163,12 +185,16 @@ def plot_errorbar(title, methods, mean, std, l, error_every, criterion,
         constrained_layout=True)
 
     for (index, axis), criterion in zip(np.ndenumerate(axes), criteria):
+        k = criteria.index(criterion)
+
         if index[0] == axes.shape[0] - 1:
             axis.set_xlabel("Timesteps")
 
         axis.set_ylabel(criterion)
 
-        k = criteria.index(criterion)
+        # y_max = np.median(np.max(mean[:, k, :], axis=-1), axis=0) * 1.5
+        # axis.set_ylim(0, y_max)
+
         x = range(0, l * n_eps, error_every) if not episodic else range(n_eps)
         if episodic:
             ee = int(n_eps / 8.)
