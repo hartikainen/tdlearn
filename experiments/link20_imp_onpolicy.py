@@ -18,7 +18,7 @@ gamma = 0.95
 sigma = np.ones(2*dim)*1.
 dt = 0.1
 mdp = examples.NLinkPendulumMDP(np.ones(dim)*.5, np.ones(dim)*.6, sigma=sigma, dt=dt)
-phi = features.squared_tri(dim*(dim+1)/2+1)
+phi = features.squared_diag(2*dim)
 
 
 n_feat = len(phi(np.zeros(mdp.dim_S)))
