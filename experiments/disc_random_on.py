@@ -11,6 +11,9 @@ import numpy as np
 import features
 import policies
 import regtd
+from experiments import experiment_main
+
+
 n = 400
 n_a = 10
 n_feat = 200
@@ -156,7 +159,7 @@ lstd.color = "b"
 
 l = 8000
 n_eps = 1
-n_indep = 5
+n_indep = 200
 
 episodic = False
 error_every = 80
@@ -165,18 +168,6 @@ title = "3. {}-State Random MDP On-policy".format(n, n_indep)
 criterion = "RMSPBE"
 criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
 
-if __name__ == "__main__":
-    if True:
-        from experiments import run_experiment, save_results, plot_errorbar
-        mean, std, raw = run_experiment(n_jobs=4, **globals())
-        save_results(**globals())
-        plot_errorbar(**globals())
-    else:
-        from experiments import load_results, plot_errorbar, filter_methods
-        data = load_results(name)
-        data['criterion'] = criterion
-        filter_methods(data)
-        plot_errorbar(**data)
 
-    for m in methods:
-        print(m, m.time)
+if __name__ == "__main__":
+    experiment_main(**globals())

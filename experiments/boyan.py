@@ -9,6 +9,7 @@ import examples
 from task import LinearDiscreteValuePredictionTask
 import numpy as np
 import features
+from experiments import experiment_main
 
 n = 14
 n_feat = 4
@@ -164,19 +165,6 @@ criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
 
 gs_errorevery = 1
 
-if __name__ == "__main__":
-    if True:
-        from experiments import run_experiment, save_results, plot_errorbar
-        mean, std, raw = run_experiment(n_jobs=4, **globals())
-        save_results(**globals())
-        plot_errorbar(**globals())
-    else:
-        from experiments import load_results, plot_errorbar, filter_methods
-        data = load_results(name)
-        data['criterion'] = criterion
-        # data['criteria'] = criteria
-        filter_methods(data)
-        plot_errorbar(**data)
 
-    for m in methods:
-        print(m, m.time)
+if __name__ == "__main__":
+    experiment_main(**globals())

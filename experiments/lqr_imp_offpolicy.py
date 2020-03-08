@@ -12,6 +12,8 @@ import util
 import features
 import policies
 from task import LinearLQRValuePredictionTask
+from experiments import experiment_main
+
 
 gamma = 0.95
 sigma = np.zeros(4)
@@ -170,17 +172,4 @@ title = "6. Lin. Cart-Pole Balancing Off-pol. Imp. Feat."
 
 
 if __name__ == "__main__":
-    if True:
-        from experiments import run_experiment, save_results, plot_errorbar
-        mean, std, raw = run_experiment(n_jobs=4, verbose=4, **globals())
-        save_results(**globals())
-        plot_errorbar(**globals())
-    else:
-        from experiments import load_results, plot_errorbar, filter_methods
-        data = load_results(name)
-        data['criterion'] = criterion
-        filter_methods(data)
-        plot_errorbar(**data)
-
-    for m in methods:
-        print(m, m.time)
+    experiment_main(**globals())

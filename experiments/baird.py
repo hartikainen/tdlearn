@@ -10,6 +10,8 @@ import features
 import matplotlib.pyplot as plt
 from task import LinearDiscreteValuePredictionTask
 import policies
+from experiments import experiment_main
+
 n = 7
 beh_pi = np.ones((n + 1, 2))
 beh_pi[:, 0] = float(n) / (n + 1)
@@ -146,17 +148,4 @@ gs_errorevery = 10
 
 
 if __name__ == "__main__":
-    if True:
-        from experiments import run_experiment, save_results, plot_errorbar
-        mean, std, raw = run_experiment(n_jobs=4, **globals())
-        save_results(**globals())
-        plot_errorbar(**globals())
-    else:
-        from experiments import load_results, plot_errorbar, filter_methods
-        data = load_results(name)
-        data['criterion'] = criterion
-        filter_methods(data)
-        plot_errorbar(**data)
-
-    for m in methods:
-        print(m, m.time)
+    experiment_main(**globals())

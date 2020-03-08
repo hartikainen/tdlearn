@@ -12,6 +12,9 @@ import features
 import policies
 from task import LinearContinuousValuePredictionTask
 import util
+from experiments import experiment_main
+
+
 gamma = 0.95
 dt = 0.1
 
@@ -190,20 +193,6 @@ gs_max_weight = 3.
 
 
 if __name__ == "__main__":
-    if True:
-        from experiments import run_experiment, save_results, plot_errorbar
-        task.set_mu_from_trajectory(n_samples=l, n_eps=n_eps, verbose=4.,
-                                    seed=0,
-                                    n_samples_eval=10000)
-        mean, std, raw = run_experiment(n_jobs=4, verbose=4, **globals())
-        save_results(**globals())
-        plot_errorbar(**globals())
-    else:
-        from experiments import load_results, plot_errorbar, filter_methods
-        data = load_results(name)
-        data['criterion'] = criterion
-        filter_methods(data)
-        plot_errorbar(**data)
-
-    for m in methods:
-        print(m, m.time)
+    task.set_mu_from_trajectory(
+        n_samples=l, n_eps=n_eps, verbose=4., seed=0, n_samples_eval=10000)
+    experiment_main(**globals())

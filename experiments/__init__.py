@@ -4,7 +4,9 @@ Generic code for running policy evaluation experiments from scripts
 and plotting their results.
 """
 __author__ = "Christoph Dann <cdann@cdann.de>"
+import argparse
 import pickle
+from pprint import pprint
 import numpy as np
 import os
 from matplotlib.colors import LogNorm
@@ -172,7 +174,7 @@ def filter_methods(data):
         #         print("not hiding: ", method.name)
 
 
-def plot_errorbar(title, methods, mean, std, l, error_every, criterion,
+def plot_errorbar(name, title, methods, mean, std, l, error_every, criterion,
                   criteria, n_eps, episodic=False, ncol=1, figsize=(7.5, 5), **kwargs):
     max_items_per_row = 3
     rows = int(np.ceil(len(criteria) / max_items_per_row))
@@ -225,7 +227,64 @@ def plot_errorbar(title, methods, mean, std, l, error_every, criterion,
     )
 
     plt.savefig(
-        'data/{name}/errorbar.png'.format(name=kwargs['name']),
+        'data/{name}/errorbar.png'.format(name=name),
         bbox_extra_artists=(legend, title),
         bbox_inches='tight',
     )
+
+
+def get_argument_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--mode',
+        type=str,
+        choices=('train', 'visualize'),
+        default='visualize')
+
+    parser.add_argument('--n-jobs', type=int, default=1)
+    parser.add_argument('--verbose', type=int, default=0)
+
+    return parser
+
+
+def experiment_main(task, name, criterion, methods, *args, **kwargs):
+    argument_parser = get_argument_parser()
+    cli_args = argument_parser.parse_args()
+
+    if cli_args.mode == 'train':
+        mean, std, raw = run_experiment(
+            *args,
+            task=task,
+            name=name,
+            criterion=criterion,
+            methods=methods,
+            n_jobs=cli_args.n_jobs,
+            verbose=cli_args.verbose,
+            **kwargs)
+
+        save_results(
+            *args,
+            name=name,
+            methods=methods,
+            mean=mean,
+            std=std,
+            raw=raw,
+            **kwargs)
+        plot_errorbar(
+            *args,
+            name=name,
+            criterion=criterion,
+            methods=methods,
+            mean=mean,
+            std=std,
+            raw=raw,
+            **kwargs)
+
+        pprint({m.name: m.time for m in methods})
+    elif cli_args.mode == 'visualize':
+        data = load_results(name)
+        data['criterion'] = criterion
+        filter_methods(data)
+        plot_errorbar(**data)
+    else:
+        raise ValueError(cli_args.mode)

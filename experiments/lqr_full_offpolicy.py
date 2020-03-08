@@ -13,6 +13,8 @@ import features
 import policies
 from task import LinearLQRValuePredictionTask
 import pickle
+from experiments import experiment_main
+
 
 gamma = 0.95
 sigma = np.array([0.] * 3 + [0.01])
@@ -165,22 +167,6 @@ criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
 name = "lqr_full_offpolicy"
 title = "8. Lin. Cart-Pole Balancing Off-pol. Perf. Feat."
 
+
 if __name__ == "__main__":
-    if True:
-        from experiments import run_experiment, save_results, plot_errorbar
-        mean, std, raw = run_experiment(n_jobs=4, verbose=4, **globals())
-        save_results(**globals())
-        plot_errorbar(**globals())
-    else:
-        from experiments import load_results, plot_errorbar, filter_methods
-        data = load_results(name)
-
-        for method in data['methods']:
-            if method.name not in set(x.name for x in methods):
-                method.hide = True
-        data['criterion'] = criterion
-        filter_methods(data)
-        plot_errorbar(**data)
-
-    for m in methods:
-        print(m, m.time)
+    experiment_main(**globals())
