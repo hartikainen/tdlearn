@@ -605,8 +605,12 @@ class LinearDiscreteValuePredictionTask(LinearValuePredictionTask):
 
         return R + self.gamma * np.dot(P, V)
 
-    def MSE(self, theta):
-        return np.sum(((theta * np.asarray(self.Phi)).sum(axis=1) - self.V_true) ** 2 * self.beh_mu)
+    def MSE(self, theta_or_fn):
+        if callable(theta_or_fn):
+            V = theta_or_fn(np.asarray(self.Phi))
+        else:
+            V = (theta * np.asarray(self.Phi)).sum(axis=1)
+        return np.sum((V - self.V_true) ** 2 * self.beh_mu)
 
     def MSBE(self, theta):
 
