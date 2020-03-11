@@ -55,6 +55,19 @@ class gaussians(object):
         return b
 
 
+class identity(object):
+    """Identity feature function."""
+
+    def __init__(self, dim):
+        self.dim = dim
+
+    def __call__(self, x):
+        return x
+
+    def __repr__(self):
+        return "identity()"
+
+
 class linear_blended(object):
     """
         official approximation function for baird star example
