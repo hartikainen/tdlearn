@@ -1,3 +1,5 @@
+from __future__ import division
+
 # -*- coding: utf-8 -*-
 """
 Generic code for running policy evaluation experiments from scripts
@@ -178,13 +180,16 @@ def plot_errorbar(name, title, methods, mean, std, l, error_every, criterion,
                   criteria, n_eps, episodic=False, ncol=1, figsize=(7.5, 5), **kwargs):
     max_items_per_row = 3
     rows = int(np.ceil(len(criteria) / max_items_per_row))
-    figsize = (figsize[0] * max_items_per_row, figsize[1] * rows)
+    items_per_row = min(max_items_per_row, len(criteria))
+    figsize = (figsize[0] * items_per_row, figsize[1] * rows)
     # figsize = (figsize[0] * len(criteria), figsize[1])
     figure, axes = plt.subplots(
         rows,
-        max_items_per_row,
+        items_per_row,
         figsize=figsize,
         constrained_layout=True)
+
+    axes = np.atleast_1d(axes)
 
     for (index, axis), criterion in zip(np.ndenumerate(axes), criteria):
         k = criteria.index(criterion)
