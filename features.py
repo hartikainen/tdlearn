@@ -3,6 +3,7 @@
 Feature function implementations
 """
 __author__ = "Christoph Dann <cdann@cdann.de>"
+import tensorflow as tf
 import numpy as np
 import swingup_ode as cyhelp
 
@@ -66,6 +67,20 @@ class identity(object):
 
     def __repr__(self):
         return "identity()"
+
+
+class one_hot(object):
+    """Identity feature function."""
+
+    def __init__(self, dim):
+        self.dim = dim
+
+    def __call__(self, x):
+        np.testing.assert_equal(x, x.astype(int))
+        return tf.one_hot(x.astype(int), self.dim).numpy()
+
+    def __repr__(self):
+        return "onehot({})".format(self.dim)
 
 
 class linear_blended(object):
