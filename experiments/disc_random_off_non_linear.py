@@ -76,14 +76,13 @@ for network_lr in (3e-4, ):
 
 l = 8000
 n_eps = 1
-n_indep = 5
+n_indep = 200
 
 episodic = False
 error_every = 80
 name = "disc_random_off_non_linear"
 title = "4. {}-State Random MDP Off-policy".format(n, n_indep)
-# criterion = "RMSE"
-criterion = "RMSPBE"
+criterion = "MSE"
 criteria = ["MSE"]
 # criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
 

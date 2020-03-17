@@ -183,7 +183,7 @@ error_every = 80
 name = "disc_random_off"
 title = "4. {}-State Random MDP Off-policy".format(n, n_indep)
 # criterion = "RMSE"
-criterion = "RMSPBE"
+criterion = "MSE"
 criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
 
 

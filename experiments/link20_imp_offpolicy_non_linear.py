@@ -21,8 +21,8 @@ dt = 0.1
 dim = 20
 sigma = np.ones(2*dim)*0.01
 mdp = examples.NLinkPendulumMDP(np.ones(dim)*.5, np.ones(dim)*.6, sigma=sigma, dt=dt)
-phi = features.squared_diag(2*dim)
-# phi = features.identity(2*dim)
+# phi = features.squared_diag(2*dim)
+phi = features.identity(2 * dim)
 
 
 n_feat = len(phi(np.zeros(mdp.dim_S)))
@@ -113,8 +113,8 @@ n_indep = 50
 n_eps = 1
 episodic = False
 criterion = "MSE"
-# criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
 criteria = ["MSE"]
+# criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
 title = "12. 20-link Lin. Pole Balancing Off-pol."
 name = "link20_imp_offpolicy"
 

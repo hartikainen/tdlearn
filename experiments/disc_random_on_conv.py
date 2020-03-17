@@ -57,9 +57,8 @@ n_indep = 20
 episodic = False
 error_every = 1000000
 name = "disc_random_on_conv"
-criterion = "RMSPBE"
 title = "3. {}-State Random MDP On-policy".format(n, n_indep)
-criterion = "RMSPBE"
+criterion = "MSE"
 criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
 
 

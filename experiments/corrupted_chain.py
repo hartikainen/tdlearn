@@ -97,7 +97,7 @@ error_every = 50
 name = "corrupted"
 n_indep = 3
 title = "{}-State Corrupted Chain ({} trials)".format(n, n_indep)
-criterion = "RMSPBE"
+criterion = "MSE"
 criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
 
 

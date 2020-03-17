@@ -160,7 +160,7 @@ error_every = 1
 name = "boyan"
 n_indep = 200
 title = "1. 14-State Boyan Chain".format(n, n_indep)
-criterion = "RMSPBE"
+criterion = "MSE"
 criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
 
 gs_errorevery = 1

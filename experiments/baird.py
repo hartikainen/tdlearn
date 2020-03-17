@@ -142,7 +142,7 @@ n_eps = 1
 episodic = False
 name = "baird"
 title = "2. Baird Star Example"
-criterion = "RMSPBE"
+criterion = "MSE"
 criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
 gs_errorevery = 10
 

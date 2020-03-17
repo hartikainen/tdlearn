@@ -165,7 +165,7 @@ episodic = False
 error_every = 80
 name = "disc_random_on"
 title = "3. {}-State Random MDP On-policy".format(n, n_indep)
-criterion = "RMSPBE"
+criterion = "MSE"
 criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
 
 

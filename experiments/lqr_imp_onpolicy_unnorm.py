@@ -141,7 +141,7 @@ n_indep = 50
 n_eps = 1
 episodic = False
 criteria = ["RMSPBE", "RMSBE", "RMSE"]
-criterion = "RMSPBE"
+criterion = "MSE"
 name = "lqr_imp_onpolicy_unnorm"
 title = "4-dim. State Pole Balancing Onpolicy Not Normalized Diagonal Features"
 
