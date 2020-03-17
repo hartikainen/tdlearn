@@ -29,6 +29,7 @@ EXPERIMENT_NAMES=(
 )
 
 for experiment in ${EXPERIMENT_NAMES[@]}; do
-    echo "experiment: ${experiment}"
-    python -m "experiments.${experiment}"
+    echo "experiment: ${experiment}, args: $@"
+    # arguments e.g.  --mode=train --n-jobs=-1 --verbose=100
+    python -m "experiments.${experiment}" "$@"
 done
