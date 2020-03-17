@@ -28,8 +28,9 @@ class ValueFunctionPredictor(object):
         samples
     """
 
-    def __init__(self, gamma=1, **kwargs):
+    def __init__(self, gamma=1, phi=None, **kwargs):
         self.gamma = gamma
+        self.phi = phi
         self.time = 0
         if not hasattr(self, "init_vals"):
             self.init_vals = {}

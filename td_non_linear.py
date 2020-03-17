@@ -147,8 +147,9 @@ class NonLinearBBO(OffPolicyValueFunctionPredictor):
             V_fn_config = V_fn_state['config']
             V_fn_weights = V_fn_state['weights']
             V_fn = tf.keras.Sequential.from_config(V_fn_config)
-            _ = V_fn(np.zeros((1, self.phi.n)))
-            V_fn.set_weights(V_fn_weights)
+            _ = V_fn(np.zeros((1, self.phi.dim)))
+            if V_fn_weights is not None:
+                V_fn.set_weights(V_fn_weights)
         else:
             V_fn = feedforward_model(
                 hidden_layer_sizes=self.hidden_layer_sizes,
@@ -162,8 +163,9 @@ class NonLinearBBO(OffPolicyValueFunctionPredictor):
             network_config = network_state['config']
             network_weights = network_state['weights']
             network = tf.keras.Sequential.from_config(network_config)
-            _ = network(np.zeros((1, self.phi.n)))
-            network.set_weights(network_weights)
+            _ = network(np.zeros((1, self.phi.dim)))
+            if network_weights is not None:
+                network.set_weights(network_weights)
         else:
             network = feedforward_model(
                 hidden_layer_sizes=self.hidden_layer_sizes,
@@ -396,8 +398,9 @@ class NonLinearTD0(OffPolicyValueFunctionPredictor):
             V_fn_config = V_fn_state['config']
             V_fn_weights = V_fn_state['weights']
             V_fn = tf.keras.Sequential.from_config(V_fn_config)
-            _ = V_fn(np.zeros((1, self.phi.n)))
-            V_fn.set_weights(V_fn_weights)
+            _ = V_fn(np.zeros((1, self.phi.dim)))
+            if V_fn_weights is not None:
+                V_fn.set_weights(V_fn_weights)
         else:
             V_fn = feedforward_model(
                 hidden_layer_sizes=self.hidden_layer_sizes,
