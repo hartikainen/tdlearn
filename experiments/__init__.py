@@ -13,6 +13,9 @@ import numpy as np
 import os
 from matplotlib.colors import LogNorm
 import matplotlib.pyplot as plt
+
+from .utils import set_gpu_memory_growth
+
 plt.ion()
 
 exp_list = ["boyan", "baird",
@@ -262,6 +265,8 @@ def get_argument_parser():
 def experiment_main(task, name, criterion, methods, *args, **kwargs):
     argument_parser = get_argument_parser()
     cli_args = argument_parser.parse_args()
+
+    set_gpu_memory_growth(True)
 
     if cli_args.mode == 'train':
         mean, std, raw = run_experiment(
