@@ -163,6 +163,10 @@ def filter_methods(data):
             print("hiding: ", method.name)
         else:
             print("not hiding: ", method.name)
+
+        # method.hide = (
+        #     'BBO' in method.name or 1e-2 < method.alpha.alpha)
+
         print(max_ys < np.max(data['mean'][i, ...], axis=-1))
         print(max_ys)
         print(np.max(data['mean'][i, ...], axis=-1))
@@ -202,14 +206,17 @@ def plot_errorbar(name, title, methods, mean, std, l, error_every, criterion,
         # y_max = np.median(np.max(mean[:, k, :], axis=-1), axis=0) * 1.5
         # axis.set_ylim(0, y_max)
 
-        x = range(0, l * n_eps, error_every) if not episodic else range(n_eps)
+        x = (
+            range(0, l * n_eps, error_every)
+            if not episodic
+            else range(n_eps))
         if episodic:
             ee = int(n_eps / 8.)
         else:
             ee = int(l * n_eps / error_every / 8.)
         if ee < 1:
             ee = 1
-        lss = ["-", "--", "-."]
+        lss = ["-", "--", "-.", ":"] * 5
         for i, m in enumerate(methods):
             if hasattr(m, "hide") and m.hide:
                 continue

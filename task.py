@@ -43,7 +43,6 @@ def tmp4(cl, n_samples, n_eps, seed, eval_on_traces=False, n_samples_eval=1):
         #                    n_next=cl.mu_n_next,seed=cl.mu_seed)
 
 
-
 class LinearValuePredictionTask(object):
     """ Base class for LQR and discrete case tasks """
 
@@ -609,7 +608,8 @@ class LinearDiscreteValuePredictionTask(LinearValuePredictionTask):
         if callable(theta_or_fn):
             V = theta_or_fn(np.asarray(self.Phi))
         else:
-            V = (theta * np.asarray(self.Phi)).sum(axis=1)
+            V = (theta_or_fn * np.asarray(self.Phi)).sum(axis=1)
+        assert V.shape == self.V_true.shape
         return np.sum((V - self.V_true) ** 2 * self.beh_mu)
 
     def MSBE(self, theta):
@@ -751,9 +751,13 @@ class LinearContinuousValuePredictionTask(LinearValuePredictionTask):
         V2 = self.gamma * np.array((theta * self.mu_phi_next_tar).sum(axis=1))
         return np.mean((V - V2 - self.mu_r_tar) ** 2)
 
-    def MSE(self, theta):
+    def MSE(self, theta_or_fn):
         """ Mean Squared Bellman Error """
-        V = np.array((theta * self.mu_phi).sum(axis=1))
+        if callable(theta_or_fn):
+            V = theta_or_fn(np.asarray(self.mu_phi))
+        else:
+            V = (theta_or_fn * np.asarray(self.phu)).sum(axis=1)
+        assert V.shape == self.mu_accum_r.shape
         return np.mean((V - self.mu_accum_r) ** 2)
 
     def MSBE(self, theta):
