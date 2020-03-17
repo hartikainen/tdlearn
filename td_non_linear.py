@@ -57,6 +57,9 @@ class NonLinearBBO(OffPolicyValueFunctionPredictor):
                  D_a,
                  prior_mean=0.0,
                  prior_stddev=0.1,
+                 V_fn_lr=3e-4,
+                 network_lr=3e-4,
+                 hidden_layer_sizes=(32, 32),
                  *args,
                  **kwargs):
         """TODO(hartikainen)."""
@@ -64,32 +67,41 @@ class NonLinearBBO(OffPolicyValueFunctionPredictor):
         self.D_a = D_a
         self.prior_mean = prior_mean
         self.prior_stddev = prior_stddev
+        self.hidden_layer_sizes = hidden_layer_sizes
+
+        self._network_lr = network_lr
+        self._V_fn_lr = V_fn_lr
+
         OffPolicyValueFunctionPredictor.__init__(self, *args, **kwargs)
-
-        # self.uncertainty_model = bbo.OnlineUncertaintyModel()
-        self.network = feedforward_model(
-            hidden_layer_sizes=(32, 32),
-            output_shape=(1, ),
-            activation='relu',
-            output_activation='linear',
-        )
-        self.V_fn = feedforward_model(
-            hidden_layer_sizes=(32, 32),
-            output_shape=(1, ),
-            activation='relu',
-            output_activation='linear',
-        )
-
-        self.network_optimizer = tf.optimizers.Adam(3e-4)
-        self.V_fn_optimizer = tf.optimizers.Adam(3e-4)
 
         self.init_vals['alpha'] = alpha
         self.alpha = self._assert_iterator(self.init_vals['alpha'])
+
+        self.reset()
 
     def clone(self):
         o = self.__class__(
             self.init_vals['alpha'], D_a=self.D_a, gamma=self.gamma, phi=self.phi)
         return o
+
+    def reset(self):
+        OffPolicyValueFunctionPredictor.reset(self)
+
+        if not hasattr(self, 'network'):
+            self.network = feedforward_model(
+                hidden_layer_sizes=self.hidden_layer_sizes,
+                output_shape=(1, ),
+                activation='relu',
+                output_activation='linear',
+            )
+            self.V_fn = feedforward_model(
+                hidden_layer_sizes=self.hidden_layer_sizes,
+                output_shape=(1, ),
+                activation='relu',
+                output_activation='linear',
+            )
+            self.network_optimizer = tf.optimizers.Adam(self._network_lr)
+            self.V_fn_optimizer = tf.optimizers.Adam(self._V_fn_lr)
 
     def __getstate__(self):
         res = self.__dict__.copy()
@@ -126,62 +138,41 @@ class NonLinearBBO(OffPolicyValueFunctionPredictor):
         return res
 
     def __setstate__(self, state):
-        if hasattr(state, 'V_fn'):
-            V_fn_state = state.pop('V_fn')
+        V_fn_state = state.pop('V_fn', None)
+        network_state = state.pop('network', None)
+
+        self.__dict__ = state.copy()
+
+        if V_fn_state is not None:
             V_fn_config = V_fn_state['config']
             V_fn_weights = V_fn_state['weights']
             V_fn = tf.keras.Sequential.from_config(V_fn_config)
+            _ = V_fn(np.zeros((1, self.phi.n)))
             V_fn.set_weights(V_fn_weights)
         else:
             V_fn = feedforward_model(
-                hidden_layer_sizes=(32, 32),
+                hidden_layer_sizes=self.hidden_layer_sizes,
                 output_shape=(1, ),
                 activation='relu',
                 output_activation='linear')
 
-        state['V_fn'] = V_fn
+        self.V_fn = V_fn
 
-        if hasattr(state, 'network'):
-            network_state = state.pop('network')
+        if network_state is not None:
             network_config = network_state['config']
             network_weights = network_state['weights']
             network = tf.keras.Sequential.from_config(network_config)
+            _ = network(np.zeros((1, self.phi.n)))
             network.set_weights(network_weights)
         else:
             network = feedforward_model(
-                hidden_layer_sizes=(32, 32),
+                hidden_layer_sizes=self.hidden_layer_sizes,
                 output_shape=(1, ),
                 activation='relu',
                 output_activation='linear')
 
-        state['network'] = network
-
-        self.__dict__ = state.copy()
+        self.network = network
         self.alpha = self._assert_iterator(self.init_vals['alpha'])
-
-    # def reset(self):
-    #     LinearValueFunctionPredictor.reset(self)
-
-    #     if self.uncertainty_model.built:
-    #         self.uncertainty_model.reset()
-    #     else:
-    #         # self.uncertainty_model(np.zeros(self.phi.dim + self.D_a)[None, ...])
-    #         if hasattr(self.phi, 'n'):
-    #             self.uncertainty_model(np.zeros(self.phi.n)[None, ...])
-    #         else:
-    #             self.uncertainty_model(np.zeros(self.phi.dim)[None, ...])
-
-    #     self.alpha = self._assert_iterator(self.init_vals['alpha'])
-    #     self.w = np.zeros_like(self.init_vals['theta'])
-    #     if hasattr(self, "A"):
-    #         del(self.A)
-    #     if hasattr(self, "b"):
-    #         del(self.b)
-
-    #     if hasattr(self, "F"):
-    #         del(self.F)
-    #     if hasattr(self, "Cmat"):
-    #         del(self.Cmat)
 
     def init_deterministic(self, task):
         import ipdb; ipdb.set_trace(context=30)
@@ -191,7 +182,7 @@ class NonLinearBBO(OffPolicyValueFunctionPredictor):
         self.A = np.array(self.F - self.Cmat)
 
     def V(self, *args, **kwargs):
-        return self.V_fn(*args, **kwargs).numpy()
+        return self.V_fn(*args, **kwargs).numpy().flatten()
 
     def update_V(self, s0, s1, r, f0=None, f1=None, rho=1, theta=None, **kwargs):
         if theta is None:
@@ -203,50 +194,123 @@ class NonLinearBBO(OffPolicyValueFunctionPredictor):
 
         self._tic()
 
-        b_N = np.concatenate((f0, ))[None, ...].astype(np.float32)
-        b_hat = np.concatenate((f0, ))[None, ...].astype(np.float32)
-        b_N_next = np.concatenate((f1, ))[None, ...].astype(np.float32)
+        b_N = np.atleast_2d(f0)
+        b_hat = np.atleast_2d(f0)
+        b_N_next = np.atleast_2d(f1)
 
-        tau = r + self.gamma * self.network(b_N_next)
+        target = r + self.gamma * self.V_fn(b_N_next)
 
-        with tf.GradientTape(persistent=True) as tape:
+        with tf.GradientTape() as tape:
             f = self.network(b_N)
 
-        f_grads = tape.gradient(f, self.network.trainable_variables)
+            prior_loss = tf.reduce_sum(tree.map_structure(
+                lambda phi: tf.reduce_mean(
+                    tf.losses.MSE(phi, tf.random.normal(
+                        tf.shape(phi),
+                        mean=self.prior_mean,
+                        stddev=self.prior_stddev))),
+                tree.flatten(self.network.trainable_variables)))
+
+            f_loss = 1.0 * (
+                tf.losses.MSE(y_true=tf.stop_gradient(target), y_pred=f)
+                + prior_loss)
+
+        # assert prior_loss == 0.0, prior_loss
+
+        f_gradients = tape.gradient(f_loss, self.network.trainable_variables)
+        self.network_optimizer.apply_gradients(
+            zip(f_gradients, self.network.trainable_variables))
+
+        # b_j = np.atleast_2d(self.phi(np.array([np.random.choice(self.D_s)])))
+        b_j = [b_N, b_N_next][np.random.choice(2)]
+        assert b_j.shape == b_N.shape
+
+        with tf.GradientTape() as tape:
+            V_j = self.V_fn(b_j)
+            f_j = self.network(b_j)
+            V_loss = 1.0 * tf.losses.MSE(
+                y_true=tf.stop_gradient(f_j), y_pred=V_j)
+
+        V_gradients = tape.gradient(V_loss, self.V_fn.trainable_variables)
+        self.V_fn_optimizer.apply_gradients(
+            zip(V_gradients, self.V_fn.trainable_variables))
+
+        print("V_loss: {:.3f}, f_loss: {:.3f}, f_i: {:.3f}, tau: {:.3f}, f_j: {:.3f}, V_j: {:.3f}"
+              "".format(
+                  V_loss.numpy().squeeze().item(),
+                  f_loss.numpy().squeeze().item(),
+                  f.numpy().squeeze().item(),
+                  target.numpy().squeeze().item(),
+                  f_j.numpy().squeeze().item(),
+                  V_j.numpy().squeeze().item()))
+
+        self._toc()
+
+        return self.theta
+
+
+class NonLinearBBOV2(NonLinearBBO):
+    def update_V(self, s0, s1, r, f0=None, f1=None, rho=1, theta=None, **kwargs):
+        if theta is None:
+            theta = self.theta
+
+        if f0 is None or f1 is None:
+            f0 = self.phi(s0)
+            f1 = self.phi(s1)
+
+        self._tic()
+
+        b_N = np.atleast_2d(f0)
+        b_hat = np.atleast_2d(f0)
+        b_N_next = np.atleast_2d(f1)
+
+        target = r + self.gamma * self.V_fn(b_N_next)
+
+        with tf.GradientTape() as tape:
+            f = self.network(b_N)
+
+        f_gradients = tape.gradient(f, self.network.trainable_variables)
 
         phi_0s = tree.map_structure(
             lambda phi: tf.random.normal(
                 tf.shape(phi), mean=self.prior_mean, stddev=self.prior_stddev),
             self.network.trainable_variables)
 
-        phi_diffs = tree.map_structure(
-            lambda phi, phi_0: phi - phi_0,
-            self.network.trainable_variables, phi_0s)
-
-        assert (f - tau).shape == [1, 1]
+        assert (f - target).shape == [1, 1]
         phi_updates = tree.map_structure(
-            lambda f_grad, phi_diff: (f - tau)[0] * f_grad + phi_diff,
-            f_grads, phi_diffs)
+            lambda f_grad, phi, phi_0: +1.0 * (
+                (f - target)[0] * f_grad + (phi - phi_0)),
+            f_gradients, self.network.trainable_variables, phi_0s)
 
         self.network_optimizer.apply_gradients(
             zip(phi_updates, self.network.trainable_variables))
 
-        # f_gradients = (f - target) * grad_f + phi_diffs
+        # tree.map_structure(
+        #     lambda phi, phi_delta: phi.assign_add(
+        #         -1.0 * self.network_lr * phi_delta),
+        #     self.network.trainable_variables, phi_updates)
 
+        # b_j = np.atleast_2d(self.phi(np.array([np.random.choice(self.D_s)])))
         b_j = [b_N, b_N_next][np.random.choice(2)]
+        assert b_j.shape == b_N.shape
 
         with tf.GradientTape() as tape:
             V_j = self.V_fn(b_j)
 
-        V_grads = tape.gradient(V_j, self.V_fn.trainable_variables)
+        V_j_gradients = tape.gradient(V_j, self.V_fn.trainable_variables)
         f_j = self.network(b_j)
 
         assert (V_j - f_j).shape == [1, 1]
         omega_updates = tree.map_structure(
-            lambda V_grad: (V_j - f_j)[0] * V_grad, V_grads)
+            lambda V_grad: +1.0 * (V_j - f_j)[0] * V_grad, V_j_gradients)
 
         self.V_fn_optimizer.apply_gradients(
             zip(omega_updates, self.V_fn.trainable_variables))
+
+        # tree.map_structure(
+        #     lambda omega, omega_delta: omega.assign_add(
+        #         -1.0 * self.V_fn_lr * omega_delta),
+        #     self.V_fn.trainable_variables, omega_updates)
 
         self._toc()
 
@@ -263,7 +327,12 @@ class NonLinearTD0(OffPolicyValueFunctionPredictor):
     University of Alberta. (p. 31)
     """
 
-    def __init__(self, alpha, D_s, D_a, **kwargs):
+    def __init__(self,
+                 alpha,
+                 D_s,
+                 D_a,
+                 hidden_layer_sizes=(32, 32),
+                 **kwargs):
         """
             alpha:  step size. This can either be a constant number or
                     an iterable object providing step sizes
@@ -271,6 +340,8 @@ class NonLinearTD0(OffPolicyValueFunctionPredictor):
         """
         self.D_s = D_s
         self.D_a = D_a
+        self.V_fn_lr = alpha
+        self.hidden_layer_sizes = hidden_layer_sizes
         OffPolicyValueFunctionPredictor.__init__(self, **kwargs)
         self.init_vals['alpha'] = alpha
         self.reset()
@@ -281,17 +352,20 @@ class NonLinearTD0(OffPolicyValueFunctionPredictor):
         return o
 
     def reset(self):
-        self.V_fn = feedforward_model(
-            hidden_layer_sizes=(32, 32),
-            output_shape=(1, ),
-            activation='relu',
-            output_activation='linear',
-        )
+        OffPolicyValueFunctionPredictor.reset(self)
 
-        self.V_fn(np.zeros([1, self.D_s]))
+        if not hasattr(self, 'network'):
+            self.V_fn = feedforward_model(
+                hidden_layer_sizes=self.hidden_layer_sizes,
+                output_shape=(1, ),
+                activation='relu',
+                output_activation='linear',
+            )
 
-        self.optimizer = tf.optimizers.Adam(3e-4)
-        self.alpha = self._assert_iterator(self.init_vals['alpha'])
+            # self.V_fn(self.phi(np.zeros([1, self.D_s]))
+            self.optimizer = tf.optimizers.Adam(self.V_fn_lr)
+
+            self.alpha = self._assert_iterator(self.init_vals['alpha'])
 
     def __getstate__(self):
         res = self.__dict__
@@ -315,33 +389,36 @@ class NonLinearTD0(OffPolicyValueFunctionPredictor):
         return res
 
     def __setstate__(self, state):
-        if hasattr(state, 'V_fn'):
-            V_fn_state = state.pop('V_fn')
+        V_fn_state = state.pop('V_fn', None)
+        self.__dict__ = state
+
+        if V_fn_state is not None:
             V_fn_config = V_fn_state['config']
             V_fn_weights = V_fn_state['weights']
             V_fn = tf.keras.Sequential.from_config(V_fn_config)
+            _ = V_fn(np.zeros((1, self.phi.n)))
             V_fn.set_weights(V_fn_weights)
         else:
             V_fn = feedforward_model(
-                hidden_layer_sizes=(32, 32),
+                hidden_layer_sizes=self.hidden_layer_sizes,
                 output_shape=(1, ),
                 activation='relu',
                 output_activation='linear')
 
-        state['V_fn'] = V_fn
+        self.V_fn = V_fn
 
-        self.__dict__ = state
         self.alpha = self._assert_iterator(self.init_vals['alpha'])
 
     def V(self, *args, **kwargs):
-        return self.V_fn(*args, **kwargs).numpy()
+        return self.V_fn(*args, **kwargs).numpy().flatten()
 
-    @property
-    def theta(self):
-        return tf.concat([
-            tf.reshape(x, [-1])
-            for x in self.V_fn.trainable_variables
-        ], axis=0)
+    # @property
+    # def theta(self):
+    #     import ipdb; ipdb.set_trace(context=30)
+    #     return tf.concat([
+    #         tf.reshape(x, [-1])
+    #         for x in self.V_fn.trainable_variables
+    #     ], axis=0)
 
     # @tf.function(experimental_relax_shapes=True)
     def update_V(self, s0, s1, r, f0=None, f1=None, theta=None, rho=1, **kwargs):
