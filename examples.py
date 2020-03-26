@@ -582,3 +582,33 @@ class BairdStarExample(mdp.MDP):
 
         mdp.MDP.__init__(self, range(1, n_corners + 1) + ["center", ],
                          actions, r, P, d0)
+
+
+class TsitsiklisTriangle(mdp.MDP):
+    """Tsitsiklis Triangle counter example for off-policy divergence.
+
+    For details, see [1].
+
+    References:
+    [1] Tsitsiklis, John N., and Benjamin Van Roy.
+        "Analysis of temporal-difference learning with function approximation."
+        Advances in neural information processing systems. 1997.
+    """
+
+    def __init__(self):
+        """Tsitsiklis Triangle counter example MDP."""
+
+        # assert n_states >= n_feat
+        # n_s = n_states
+        # self.n_feat = n_feat
+        states = tuple(range(3))
+        actions = (0, )
+        # d0 = np.array((1/3, 1/3, 1/3, 0.0))
+        d0 = np.ones(3) / 3
+        r = np.zeros((3, 1, 3))
+        P = np.array((
+            ((0.5, 0.0, 0.5), ),
+            ((0.5, 0.5, 0.0), ),
+            ((0.0, 0.5, 0.5), ),
+        ))
+        mdp.MDP.__init__(self, states, actions, r, P, d0, terminal_trans=4)
