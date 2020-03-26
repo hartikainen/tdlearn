@@ -242,11 +242,8 @@ class SpiralNonLinearBBO(OffPolicyValueFunctionPredictor):
         return self.theta
 
 
-class SpiralNonLinearTwoLevel(SpiralNonLinearBBO):
+class SpiralNonLinearBilevel(SpiralNonLinearBBO):
     def update_V(self, s0, s1, r, f0=None, f1=None, rho=1, theta=None, **kwargs):
-        if theta is None:
-            theta = self.theta
-
         if f0 is None or f1 is None:
             f0 = self.phi(s0)
             f1 = self.phi(s1)
@@ -256,26 +253,27 @@ class SpiralNonLinearTwoLevel(SpiralNonLinearBBO):
         self._tic()
 
         b_N = np.atleast_2d(f0)
-        b_hat = np.atleast_2d(f0)
         b_N_next = np.atleast_2d(f1)
+
+        theta_0 = self.network.get_weights()[0].copy()
+        omega_0 = self.V_fn.get_weights()[0].copy()
 
         target = r + self.gamma * self.V_fn(b_N_next)
         assert np.size(target) == 1, (target, target.shape)
 
         with tf.GradientTape() as tape:
             f = self.network(b_N)
-            f_loss = tf.losses.MSE(y_true=target, y_pred=f)
+            f_loss = 0.5 * tf.losses.MSE(y_true=target, y_pred=f)
 
         f_gradients = tape.gradient(f_loss, self.network.trainable_variables)
         self.network_optimizer.apply_gradients(
             zip(f_gradients, self.network.trainable_variables))
 
         alpha = self._V_fn_lr
-        omega = self.V_fn.get_weights()[0]
-        theta = self.network.get_weights()[0]
-        self.V_fn.set_weights([(1 - alpha) * omega + alpha * theta])
+        omega_1 = (1 - alpha) * omega_0 + alpha * theta_0
+        self.V_fn.set_weights([omega_1])
 
-        _V_loss = np.abs(omega - theta)
+        _V_loss = np.abs(omega_0 - theta_0)
         print("V_loss: {:.3f}, f_loss: {:.3f}, f_i: {:.3f}, tau: {:.3f}"
               "".format(
                   _V_loss.item(),
