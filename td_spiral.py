@@ -34,9 +34,7 @@ class SpiralModel(tf.keras.Model):
             2.0 * tf.cos(x),
         ))
 
-        result_v0 = tf.gather(V, tf.argmax(inputs, axis=1))[..., None]
         result = tf.linalg.matvec(inputs, V)[..., None]
-        tf.debugging.assert_equal(result, result_v0)
         tf.debugging.assert_equal(tf.rank(result), 2)
         tf.debugging.assert_equal(tf.shape(result)[0], tf.shape(inputs)[0])
         tf.debugging.assert_equal(tf.shape(result)[1], 1)
@@ -277,7 +275,7 @@ class SpiralNonLinearBilevel(SpiralNonLinearBBO):
         grad_f = tape.gradient(f, self.network.trainable_variables[0])
         beta = self._network_lr
         delta = f - target
-        theta_1 = theta_0 + beta * delta * grad_f
+        theta_1 = theta_0 - beta * delta * grad_f
         self.network.set_weights([theta_1])
 
         alpha = self._V_fn_lr
