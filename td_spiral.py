@@ -247,6 +247,10 @@ class SpiralNonLinearBBO(OffPolicyValueFunctionPredictor):
 
 class SpiralNonLinearBilevel(SpiralNonLinearBBO):
     def update_V(self, s0, s1, r, f0=None, f1=None, rho=1, theta=None, **kwargs):
+        assert 0 <= s0 and s0 < 3, s0
+        assert 0 <= s1 and s1 < 3, s1
+        assert s1 != ((s0 + 1) % 3)
+
         if f0 is None or f1 is None:
             f0 = self.phi(s0)
             f1 = self.phi(s1)
@@ -281,12 +285,15 @@ class SpiralNonLinearBilevel(SpiralNonLinearBBO):
         self.V_fn.set_weights([omega_1])
 
         _V_loss = np.abs(omega_0 - theta_0)
-        print("V_loss: {:.3f}, f_loss: {:.3f}, f_i: {:.3f}, tau: {:.3f}"
+        print("V_loss: {:.3f}, f_loss: {:.3f}, f_i: {:.3f}, tau: {:.3f}, s0: {}, s1: {}"
               "".format(
                   _V_loss.item(),
                   delta.numpy().squeeze().item(),
                   f.numpy().squeeze().item(),
-                  target.numpy().squeeze().item()))
+                  target.numpy().squeeze().item(),
+                  int(s0),
+                  int(s1),
+              ))
 
         self._toc()
 
