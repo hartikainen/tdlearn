@@ -13,6 +13,7 @@ import numpy as np
 import os
 from matplotlib.colors import LogNorm
 import matplotlib.pyplot as plt
+import examples
 
 from .utils import set_gpu_memory_growth
 
@@ -157,7 +158,7 @@ def replace_title(exp, data):
     return data
 
 
-def filter_methods(data):
+def filter_methods(data, filter_fn=lambda data, method: False):
     max_ys = np.median(np.max(data['mean'], axis=-1), axis=0) * 5.0
 
     for i, method in enumerate(data['methods']):
@@ -184,7 +185,7 @@ def filter_methods(data):
 
 
 def plot_errorbar(name, title, methods, mean, std, l, error_every, criterion,
-                  criteria, n_eps, episodic=False, ncol=1, figsize=(7.5, 5), **kwargs):
+                  criteria, n_eps, episodic=False, ncol=1, figsize=(7.5, 5), filename=None, **kwargs):
     max_items_per_row = 3
     rows = int(np.ceil(len(criteria) / max_items_per_row))
     items_per_row = min(max_items_per_row, len(criteria))
@@ -221,7 +222,7 @@ def plot_errorbar(name, title, methods, mean, std, l, error_every, criterion,
             ee = 1
         lss = ["-", "--", "-.", ":"] * 5
         for i, m in enumerate(methods):
-            if hasattr(m, "hide") and m.hide:
+            if getattr(m, "hide", False):
                 continue
             ls = lss[int(i / 7)]
 
@@ -241,8 +242,10 @@ def plot_errorbar(name, title, methods, mean, std, l, error_every, criterion,
         ncol=5,
     )
 
+    if filename is None:
+        filename = 'errorbar'
     plt.savefig(
-        'data/{name}/errorbar.png'.format(name=name),
+        'data/{name}/{filename}.png'.format(name=name, filename=filename),
         bbox_extra_artists=(legend, title),
         bbox_inches='tight',
     )
@@ -301,7 +304,27 @@ def experiment_main(task, name, criterion, methods, *args, **kwargs):
     elif cli_args.mode == 'visualize':
         data = load_results(name)
         data['criterion'] = criterion
-        filter_methods(data)
-        plot_errorbar(**data)
+        if isinstance(data['mdp'], examples.TsitsiklisTriangle):
+            for alpha_order_fn in (np.greater_equal, np.less_equal, np.not_equal):
+
+                def filter_fn(data, method, i):
+                    alpha = float(method.name.split(',')[0].split('=')[-1])
+                    beta = float(method.name.split(',')[1].split('=')[-1])
+                    return (
+                        alpha_order_fn(alpha, beta)
+                        # or 5.0 < np.mean(data['mean'][i, ...])
+                        or np.any(np.isnan(data['mean'][i, ...])))
+
+                filter_methods(data, filter_fn)
+                operator_name = {
+                    np.greater_equal: 'lt',
+                    np.less_equal: 'gt',
+                    np.not_equal: 'eq',
+                }[alpha_order_fn]
+                filename = 'errorbar-bilinear-alpha-{}-beta'.format(operator_name)
+                plot_errorbar(filename=filename, **data)
+        else:
+            filter_methods(data)
+            plot_errorbar(**data)
     else:
         raise ValueError(cli_args.mode)
