@@ -86,9 +86,9 @@ for network_lr in (1e-2, ):
 #     non_linear_td0.color = "black"
 #     methods.append(non_linear_td0)
 
-l = 20
-n_eps = 100
-episodic = True
+l = 1000
+n_eps = 1
+episodic = False
 error_every = 1
 name = "tsitsiklis_triangle_non_linear"
 n_indep = 50
