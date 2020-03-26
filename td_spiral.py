@@ -260,14 +260,18 @@ class SpiralNonLinearBilevel(SpiralNonLinearBBO):
 
         target = r + self.gamma * self.V_fn(b_N_next)
         assert np.size(target) == 1, (target, target.shape)
+        target = tf.squeeze(target)
 
         with tf.GradientTape() as tape:
             f = self.network(b_N)
-            f_loss = 0.5 * tf.losses.MSE(y_true=target, y_pred=f)
+            assert np.size(f) == 1, (f, f.shape)
+            f = tf.squeeze(f)
 
-        f_gradients = tape.gradient(f_loss, self.network.trainable_variables)
-        self.network_optimizer.apply_gradients(
-            zip(f_gradients, self.network.trainable_variables))
+        grad_f = tape.gradient(f, self.network.trainable_variables[0])
+        beta = self._network_lr
+        delta = f - target
+        theta_1 = theta_0 + beta * delta * grad_f
+        self.network.set_weights([theta_1])
 
         alpha = self._V_fn_lr
         omega_1 = (1 - alpha) * omega_0 + alpha * theta_0
@@ -277,7 +281,7 @@ class SpiralNonLinearBilevel(SpiralNonLinearBBO):
         print("V_loss: {:.3f}, f_loss: {:.3f}, f_i: {:.3f}, tau: {:.3f}"
               "".format(
                   _V_loss.item(),
-                  f_loss.numpy().squeeze().item(),
+                  delta.numpy().squeeze().item(),
                   f.numpy().squeeze().item(),
                   target.numpy().squeeze().item()))
 
