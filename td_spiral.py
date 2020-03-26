@@ -28,16 +28,19 @@ class SpiralModel(tf.keras.Model):
             tf.reduce_sum(tf.cast(inputs == 1, tf.float32), axis=1), 1.0)
 
         x = (tf.sqrt(3.0) * self.omega) / 2.0
-        V = tf.exp(self._epsilon * self.omega) * tf.convert_to_tensor((
+        V = tf.exp(self._epsilon * self.omega) * tf.stack((
             tf.sqrt(3.0) * tf.sin(x) - tf.cos(x),
             - tf.sqrt(3.0) * tf.sin(x) - tf.cos(x),
             2.0 * tf.cos(x),
         ))
 
-        result = tf.gather(V, tf.argmax(inputs, axis=1))[..., None]
+        result_v0 = tf.gather(V, tf.argmax(inputs, axis=1))[..., None]
+        result = tf.linalg.matvec(inputs, V)[..., None]
+        tf.debugging.assert_equal(result, result_v0)
         tf.debugging.assert_equal(tf.rank(result), 2)
         tf.debugging.assert_equal(tf.shape(result)[0], tf.shape(inputs)[0])
         tf.debugging.assert_equal(tf.shape(result)[1], 1)
+
         return result
 
     def get_config(self):
