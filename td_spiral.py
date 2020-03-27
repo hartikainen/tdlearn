@@ -248,6 +248,8 @@ class SpiralNonLinearBilevel(SpiralNonLinearBBO):
         assert 0 <= s0 and s0 < 3, s0
         assert 0 <= s1 and s1 < 3, s1
         assert s1 != ((s0 + 1) % 3)
+        assert r == 0, r
+        assert rho == 1
 
         if f0 is None or f1 is None:
             f0 = self.phi(s0)
