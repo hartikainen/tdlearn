@@ -15,7 +15,7 @@ methods = (("GTD", td.GTD),
            ("LSTD", td.RecursiveLSTDLambdaJP, td.RecursiveLSTDLambda),
            ("FPKF", td.FPKF))
 
-print r"Task &"," & ".join([a[0] for a in methods]),r"\\"
+print((r"Task &"," & ".join([a[0] for a in methods]),r"\\"))
 
 for j,exp in enumerate(exp_list):
     d = load_results(exp)
@@ -40,8 +40,8 @@ for j,exp in enumerate(exp_list):
         l = ["{:.2f}".format(a) for a in e]
     i = np.argmin(np.array(e))
     l[i] = r"\bf{"+l[i]+"}"
-    print "{}&".format(j+1), " & ".join(l), r"\\"
+    print(("{}&".format(j+1), " & ".join(l), r"\\"))
 
 for j,exp in enumerate(exp_list):
     d = load_results(exp)
-    print r"({}) {} \\".format(j+1, d["title"])
+    print((r"({}) {} \\".format(j+1, d["title"])))

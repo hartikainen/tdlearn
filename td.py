@@ -41,7 +41,7 @@ class ValueFunctionPredictor(object):
     def reset(self):
         self.time = 0
         self.reset_trace()
-        for k, v in self.init_vals.items():
+        for k, v in list(self.init_vals.items()):
             self.__setattr__(k, copy.copy(v))
 
     def reset_trace(self):
@@ -171,7 +171,7 @@ class BBO(LinearValueFunctionPredictor, OffPolicyValueFunctionPredictor):
         res = self.__dict__.copy()
         for n in ("alpha", ):
             if isinstance(res[n], itertools.repeat):
-                res[n] = res[n].next()
+                res[n] = next(res[n])
 
         uncertainty_model = res.pop('uncertainty_model')
         if hasattr(uncertainty_model, 'mu_hat'):
@@ -261,7 +261,7 @@ class BBO(LinearValueFunctionPredictor, OffPolicyValueFunctionPredictor):
                 delta.reshape(1, 1),
             ), axis=0)
 
-        self.theta -= self.alpha.next() * rho * MSBBE_gradient.numpy()
+        self.theta -= next(self.alpha) * rho * MSBBE_gradient.numpy()
 
         self._toc()
 
@@ -287,7 +287,7 @@ class BBOV2(BBO):
         res = self.__dict__.copy()
         for n in ("alpha", ):
             if isinstance(res[n], itertools.repeat):
-                res[n] = res[n].next()
+                res[n] = next(res[n])
 
         uncertainty_model = res.pop('uncertainty_model')
         if hasattr(uncertainty_model, 'rho'):
@@ -373,7 +373,7 @@ class GTDBase(LinearValueFunctionPredictor, OffPolicyValueFunctionPredictor):
         res = self.__dict__
         for n in ["alpha", "beta"]:
             if isinstance(res[n], itertools.repeat):
-                res[n] = res[n].next()
+                res[n] = next(res[n])
         return res
 
     def __setstate__(self, state):
@@ -426,8 +426,8 @@ class GTD(GTDBase):
         delta = r + self.gamma * np.dot(theta, f1) - np.dot(theta, f0)
         a = np.dot(f0, w)
 
-        w += self.beta.next() * rho * (delta * f0 - w)
-        theta += self.alpha.next() * rho * (f0 - self.gamma * f1) * a
+        w += next(self.beta) * rho * (delta * f0 - w)
+        theta += next(self.alpha) * rho * (f0 - self.gamma * f1) * a
 
         self.w = w
         self.theta = theta
@@ -440,8 +440,8 @@ class GTD(GTDBase):
         if theta is None:
             theta = self.theta
 
-        w_d = w + self.beta.next() * (np.dot(self.A, theta) - w + self.b)
-        theta_d = theta + self.alpha.next() * (- np.dot(self.A.T, w) + self.b)
+        w_d = w + next(self.beta) * (np.dot(self.A, theta) - w + self.b)
+        theta_d = theta + next(self.alpha) * (- np.dot(self.A.T, w) + self.b)
         self.theta = theta_d
         self.w = w_d
         return self.theta
@@ -473,8 +473,8 @@ class GTD2(GTDBase):
         delta = r + self.gamma * np.dot(theta, f1) - np.dot(theta, f0)
         a = np.dot(f0, w)
 
-        w += self.beta.next() * (rho * delta - a) * f0
-        theta += self.alpha.next() * rho * a * (f0 - self.gamma * f1)
+        w += next(self.beta) * (rho * delta - a) * f0
+        theta += next(self.alpha) * rho * a * (f0 - self.gamma * f1)
 
         self.w = w
         self.theta = theta
@@ -486,9 +486,8 @@ class GTD2(GTDBase):
         if theta is None:
             theta = self.theta
 
-        w_d = w + self.beta.next(
-        ) * (np.dot(self.A, theta) - np.dot(self.Cmat, w) + self.b)
-        theta_d = theta + self.alpha.next() * (- np.dot(self.A.T, w) + self.b)
+        w_d = w + next(self.beta) * (np.dot(self.A, theta) - np.dot(self.Cmat, w) + self.b)
+        theta_d = theta + next(self.alpha) * (- np.dot(self.A.T, w) + self.b)
         self.theta = theta_d
         self.w = w_d
         return self.theta
@@ -519,8 +518,8 @@ class TDC(GTDBase):
         delta = r + self.gamma * np.dot(theta, f1) - np.dot(theta, f0)
         a = np.dot(f0, w)
 
-        w += self.beta.next() * (rho * delta - a) * f0
-        theta += self.alpha.next() * rho * (delta * f0 - self.gamma * f1 * a)
+        w += next(self.beta) * (rho * delta - a) * f0
+        theta += next(self.alpha) * rho * (delta * f0 - self.gamma * f1 * a)
         self.w = w
         self.theta = theta
         self._toc()
@@ -531,10 +530,8 @@ class TDC(GTDBase):
         if theta is None:
             theta = self.theta
 
-        w_d = w + self.beta.next(
-        ) * (np.dot(self.A, theta) - np.dot(self.Cmat, w) + self.b)
-        theta_d = theta + self.alpha.next(
-        ) * (np.dot(self.A, theta) - np.dot(self.F.T, w) + self.b)
+        w_d = w + next(self.beta) * (np.dot(self.A, theta) - np.dot(self.Cmat, w) + self.b)
+        theta_d = theta + next(self.alpha) * (np.dot(self.A, theta) - np.dot(self.F.T, w) + self.b)
         self.theta = theta_d
         self.w = w_d
         return self.theta
@@ -577,9 +574,9 @@ class TDCLambda(GTDBase, LambdaValueFunctionPredictor):
         delta = r + self.gamma * np.dot(theta, f1) - np.dot(theta, f0)
         a = np.dot(f0, w)
 
-        theta += self.alpha.next() * (delta * self.z - self.gamma *
+        theta += next(self.alpha) * (delta * self.z - self.gamma *
                                       (1 - self.lam) * np.dot(self.z, w) * f1)
-        w += self.beta.next() * (delta * self.z - a * f0)
+        w += next(self.beta) * (delta * self.z - a * f0)
         self.w = w
         self.theta = theta
         self._toc()
@@ -608,9 +605,9 @@ class GeriTDCLambda(TDCLambda):
         delta = r + self.gamma * np.dot(theta, f1) - np.dot(theta, f0)
         a = np.dot(f0, w)
 
-        theta += self.alpha.next() * (delta * self.z - self.gamma *
+        theta += next(self.alpha) * (delta * self.z - self.gamma *
                                       (1 - self.lam) * np.dot(self.z, w) * f1)
-        w += self.beta.next() * (delta * self.z - rho * a * f0)
+        w += next(self.beta) * (delta * self.z - rho * a * f0)
         self.w = w
         self.theta = theta
         self._toc()
@@ -639,8 +636,8 @@ class GeriTDC(TDC):
         delta = r + self.gamma * np.dot(theta, f1) - np.dot(theta, f0)
         a = np.dot(f0, w)
 
-        w += self.beta.next() * rho * (delta - a) * f0
-        theta += self.alpha.next() * rho * (delta * f0 - self.gamma * f1 * a)
+        w += next(self.beta) * rho * (delta - a) * f0
+        theta += next(self.alpha) * rho * (delta * f0 - self.gamma * f1 * a)
         self.w = w
         self.theta = theta
         self._toc()
@@ -663,7 +660,7 @@ class KTD(LinearValueFunctionPredictor):
         self.reward_noise = reward_noise
         self.eta = eta
         if eta is not None and theta_noise is not None:
-            print "Warning, eta and theta_noise are complementary"
+            print("Warning, eta and theta_noise are complementary")
         self.theta_noise = theta_noise
         self.reset()
 
@@ -696,7 +693,7 @@ class KTD(LinearValueFunctionPredictor):
             f1 = self.phi(s1)
         self._tic()
         if theta is not None:
-            print "Warning, setting theta by hand is not valid"
+            print("Warning, setting theta by hand is not valid")
 
         # Prediction Step
         xn = np.dot(self.F, self.x)
@@ -762,7 +759,7 @@ class GPTDP(LinearValueFunctionPredictor):
             f1 = self.phi(s1)
         self._tic()
         if theta is not None:
-            print "Warning, setting theta by hand is not valid"
+            print("Warning, setting theta by hand is not valid")
 
         df = f0 - self.gamma * f1
         c = self.gamma * self.sinv * (self.sigma ** 2)
@@ -798,7 +795,7 @@ class GPTDPLambda(LinearValueFunctionPredictor, LambdaValueFunctionPredictor):
         self.init_vals["b"] = np.zeros(n)
         self.init_vals["phi_m"] = np.zeros(n)
         self.init_vals["phi_v"] = np.zeros(n)
-        for k, v in self.init_vals.items():
+        for k, v in list(self.init_vals.items()):
             if k == "theta":
                 continue
             self.__setattr__(k, copy.copy(v))
@@ -814,7 +811,7 @@ class GPTDPLambda(LinearValueFunctionPredictor, LambdaValueFunctionPredictor):
             r = np.dot(r, np.dot(self.C2, self.b))
             return r
         except np.linalg.LinAlgError as e:
-            print e
+            print(e)
             return np.zeros_like(self.b)
         finally:
             self._toc()
@@ -984,7 +981,7 @@ class LSTDLambda(OffPolicyValueFunctionPredictor, LambdaValueFunctionPredictor, 
         self.init_vals["b"] = np.zeros(n)
         self.init_vals["phi_m"] = np.zeros(n)
         self.init_vals["phi_v"] = np.zeros(n)
-        for k, v in self.init_vals.items():
+        for k, v in list(self.init_vals.items()):
             if k == "theta":
                 continue
             self.__setattr__(k, copy.copy(v))
@@ -997,7 +994,7 @@ class LSTDLambda(OffPolicyValueFunctionPredictor, LambdaValueFunctionPredictor, 
             n = self.C1.shape[0]
             return -np.dot(np.linalg.pinv(self.C1 + self.C2 + self.tau * np.eye(n)), self.b)
         except np.linalg.LinAlgError as e:
-            print e
+            print(e)
             return np.zeros_like(self.b)
         finally:
             self._toc()
@@ -1110,7 +1107,7 @@ class RecursiveLSTDLambdaJP(OffPolicyValueFunctionPredictor, LambdaValueFunction
     def reset(self):
         self.reset_trace()
         self.init_vals["C"] = np.eye(len(self.init_vals["theta"])) * self.eps
-        for k, v in self.init_vals.items():
+        for k, v in list(self.init_vals.items()):
             self.__setattr__(k, copy.copy(v))
 
     def update_V(self, s0, s1, r, f0=None, f1=None, theta=None, rho=1, **kwargs):
@@ -1177,7 +1174,7 @@ class RecursiveLSPELambda(OffPolicyValueFunctionPredictor, LambdaValueFunctionPr
         res = self.__dict__
         for n in ["alpha"]:
             if isinstance(res[n], itertools.repeat):
-                res[n] = res[n].next()
+                res[n] = next(res[n])
         return res
 
     def __setstate__(self, state):
@@ -1190,7 +1187,7 @@ class RecursiveLSPELambda(OffPolicyValueFunctionPredictor, LambdaValueFunctionPr
         self.init_vals["A"] = np.zeros((n, n))
         self.init_vals["b"] = np.zeros(n)
         self.init_vals["N"] = np.eye(n) * self.eps
-        for k, v in self.init_vals.items():
+        for k, v in list(self.init_vals.items()):
             self.__setattr__(k, copy.copy(v))
         self.alpha = self._assert_iterator(self.init_vals['alpha'])
 
@@ -1214,8 +1211,7 @@ class RecursiveLSPELambda(OffPolicyValueFunctionPredictor, LambdaValueFunctionPr
 
         self.b += rho * self.z * r
         self.i += 1
-        theta += self.alpha.next(
-        ) * np.dot(self.N, (self.b - np.dot(self.A, theta)))
+        theta += next(self.alpha) * np.dot(self.N, (self.b - np.dot(self.A, theta)))
         self.theta = theta
         self.z = self.gamma * self.lam * rho * self.z + f1
         self._toc()
@@ -1255,8 +1251,7 @@ class RecursiveLSPELambdaCO(RecursiveLSPELambda):
 
         self.b += rho * self.z * r
         self.i += 1
-        theta += self.alpha.next(
-        ) * np.dot(self.N, (self.b - np.dot(self.A, theta)))
+        theta += next(self.alpha) * np.dot(self.N, (self.b - np.dot(self.A, theta)))
         self.theta = theta
         self.z = self.gamma * self.lam * rho * self.z + f1
         self._toc()
@@ -1302,7 +1297,7 @@ class FPKF(OffPolicyValueFunctionPredictor, LambdaValueFunctionPredictor, Linear
         res = self.__dict__
         for n in ["alpha", "beta"]:
             if isinstance(res[n], itertools.repeat):
-                res[n] = res[n].next()
+                res[n] = next(res[n])
         return res
 
     def __setstate__(self, state):
@@ -1318,7 +1313,7 @@ class FPKF(OffPolicyValueFunctionPredictor, LambdaValueFunctionPredictor, Linear
         n = len(self.init_vals["theta"])
         self.init_vals["N"] = np.eye(n) * self.eps
         self.i = 0
-        for k, v in self.init_vals.items():
+        for k, v in list(self.init_vals.items()):
             self.__setattr__(k, copy.copy(v))
         self.alpha = self._assert_iterator(self.init_vals['alpha'])
         self.beta = self._assert_iterator(self.init_vals['beta'])
@@ -1342,10 +1337,10 @@ class FPKF(OffPolicyValueFunctionPredictor, LambdaValueFunctionPredictor, Linear
         self.N -= np.outer(np.dot(self.N, f0), L) / (1 + np.dot(L, f0))
         deltaf = f0 - self.gamma * rho * f1
         self.i += 1
-        a = self.alpha.next()
+        a = next(self.alpha)
         if self.i < self.mins:
             a = 0.
-        b = self.beta.next()
+        b = next(self.beta)
         theta += a * b * self.i / (b + self.i) * np.dot(
             self.N, (self.z * rho * r - np.dot(self.Z, deltaf)))
         self.theta = theta
@@ -1384,7 +1379,7 @@ class RecursiveLSTDLambda(OffPolicyValueFunctionPredictor, LambdaValueFunctionPr
     def reset(self):
         self.reset_trace()
         self.init_vals["C"] = np.eye(len(self.init_vals["theta"])) * self.eps
-        for k, v in self.init_vals.items():
+        for k, v in list(self.init_vals.items()):
             self.__setattr__(k, copy.copy(v))
 
     def update_V(self, s0, s1, r, f0=None, f1=None, theta=None, rho=1, **kwargs):
@@ -1475,7 +1470,7 @@ class LinearTDLambda(OffPolicyValueFunctionPredictor, LambdaValueFunctionPredict
     def deterministic_update(self, theta=None):
         if theta is None:
             theta = self.theta
-        theta_d = theta + self.alpha.next() * np.dot(self.A, theta) + self.b
+        theta_d = theta + next(self.alpha) * np.dot(self.A, theta) + self.b
         self.theta = theta_d
         return self.theta
 
@@ -1483,7 +1478,7 @@ class LinearTDLambda(OffPolicyValueFunctionPredictor, LambdaValueFunctionPredict
         res = self.__dict__
         for n in ["alpha"]:
             if isinstance(res[n], itertools.repeat):
-                res[n] = res[n].next()
+                res[n] = next(res[n])
         return res
 
     def __setstate__(self, state):
@@ -1600,7 +1595,7 @@ class ResidualGradient(OffPolicyValueFunctionPredictor, LinearValueFunctionPredi
         self._tic()
         delta = r + self.gamma * np.dot(theta, f1) \
             - np.dot(theta, f0)
-        theta += self.alpha.next() * delta * rho * (f0 - self.gamma * f1)
+        theta += next(self.alpha) * delta * rho * (f0 - self.gamma * f1)
         self.theta = theta
         self._toc()
         return theta
@@ -1609,7 +1604,7 @@ class ResidualGradient(OffPolicyValueFunctionPredictor, LinearValueFunctionPredi
         res = self.__dict__
         for n in ["alpha"]:
             if isinstance(res[n], itertools.repeat):
-                res[n] = res[n].next()
+                res[n] = next(res[n])
         return res
 
     def __setstate__(self, state):
@@ -1635,7 +1630,7 @@ class ResidualGradientDS(ResidualGradient):
         self._tic()
         delta = r + self.gamma * np.dot(theta, f1) \
             - np.dot(theta, f0)
-        theta += self.alpha.next() * delta * rho * (f0 - self.gamma * f1t)
+        theta += next(self.alpha) * delta * rho * (f0 - self.gamma * f1t)
         self.theta = theta
         self._toc()
         return theta
@@ -1674,7 +1669,7 @@ class LinearTD0(LinearValueFunctionPredictor, OffPolicyValueFunctionPredictor):
         res = self.__dict__
         for n in ["alpha"]:
             if isinstance(res[n], itertools.repeat):
-                res[n] = res[n].next()
+                res[n] = next(res[n])
         return res
 
     def __setstate__(self, state):
@@ -1703,7 +1698,7 @@ class LinearTD0(LinearValueFunctionPredictor, OffPolicyValueFunctionPredictor):
         logging.debug("TD Learning Delta {}".format(delta.numpy()))
         # print theta
         # print f0, f1
-        al = self.alpha.next()
+        al = next(self.alpha)
         # if isinstance(self.alpha,  RMalpha):
         #    print al, self.alpha.t
         theta += al * delta * rho * f0
@@ -1736,7 +1731,7 @@ class TabularTD0(ValueFunctionPredictor):
     def update_V(self, s0, s1, r, V, **kwargs):
         self._tic()
         delta = r + self.gamma * V[s1] - V[s0]
-        V[s0] += self.alpha.next() * delta
+        V[s0] += next(self.alpha) * delta
         self._toc()
         return V
 
@@ -1784,7 +1779,7 @@ class TabularTDLambda(ValueFunctionPredictor):
             z[s0] = 1
         elif self.trace_type == "accumulating":
             z[s0] += 1
-        V += self.alpha.next() * delta * z
+        V += next(self.alpha) * delta * z
         self.z = z
         self._toc()
         return V
@@ -1815,7 +1810,7 @@ class BRM(OffPolicyValueFunctionPredictor, LinearValueFunctionPredictor):
         self.init_vals["C"] = self.init_theta * np.eye(len(
             self.init_vals["theta"]))
         self.init_vals["b"] = -self.init_vals["theta"] * self.init_theta
-        for k, v in self.init_vals.items():
+        for k, v in list(self.init_vals.items()):
             if k == "theta":
                 continue
             self.__setattr__(k, copy.copy(v))
@@ -1897,7 +1892,7 @@ class RecursiveBRMDS(OffPolicyValueFunctionPredictor, LinearValueFunctionPredict
         self.reset_trace()
         self.init_vals["C"] = np.eye(len(self.init_vals["theta"])) * self.eps
         self.init_vals["b"] = np.zeros(len(self.init_vals["theta"]))
-        for k, v in self.init_vals.items():
+        for k, v in list(self.init_vals.items()):
             self.__setattr__(k, copy.copy(v))
 
     def update_V(self, s0, s1, r, f0=None, f1=None, f1t=None, s1t=None, rt=None, theta=None, rho=1., rhot=1., **kwargs):
@@ -1950,7 +1945,7 @@ class RecursiveBRMLambda(OffPolicyValueFunctionPredictor, LambdaValueFunctionPre
         self.init_vals["b"] = np.zeros(n)
         self.init_vals["last_rho"] = 1.
         self.init_vals["z"] = 0.
-        for k, v in self.init_vals.items():
+        for k, v in list(self.init_vals.items()):
             self.__setattr__(k, copy.copy(v))
 
     def update_V(self, s0, s1, r, f0=None, f1=None, theta=None, rho=1., **kwargs):
@@ -2028,7 +2023,7 @@ class RecursiveBRM(OffPolicyValueFunctionPredictor, LinearValueFunctionPredictor
         self.reset_trace()
         self.init_vals["C"] = np.eye(len(self.init_vals["theta"])) * self.eps
         self.init_vals["b"] = np.zeros(len(self.init_vals["theta"]))
-        for k, v in self.init_vals.items():
+        for k, v in list(self.init_vals.items()):
             self.__setattr__(k, copy.copy(v))
 
     def update_V(self, s0, s1, r, f0=None, f1=None, theta=None, rho=1., **kwargs):

@@ -7,7 +7,7 @@ Usage:
     p.render(percentage, message)
 """
 
-import terminal
+from . import terminal
 import sys
 import os
 import datetime
@@ -18,17 +18,19 @@ class Timer(object):
         self.name = name
         self.enabled = active
         self.print_enter = print_enter
+
     def __enter__(self):
         self.tstart = datetime.datetime.now()
         if self.print_enter and self.name and self.enabled:
-            print 'Start [%s]' % self.name
+            print('Start [%s]' % self.name)
 
     def __exit__(self, type, value, traceback):
         if not self.enabled:
             return
         if self.name:
-            print '[%s]' % self.name,
-        print 'Elapsed: %s' % str(datetime.datetime.now() - self.tstart)
+            print('[%s]' % self.name, end=' ')
+        print('Elapsed: %s' % str(datetime.datetime.now() - self.tstart))
+
 
 class ProgressBar(object):
     """Terminal progress bar class"""
@@ -77,7 +79,7 @@ class ProgressBar(object):
             msg = 'Total: %s' % str(datetime.datetime.now() - self.tstart)
             self.done(msg)
         if type is KeyboardInterrupt:
-            print "Aborted by user"
+            print("Aborted by user")
     def update(self,cur, total, msg = '', time=True):
         if not self.enabled: return
         elapsed = datetime.datetime.now() - self.tstart
@@ -100,9 +102,9 @@ class ProgressBar(object):
         if not self.enabled: return
         if not hasattr(sys.stdout, "fileno") or not os.isatty(sys.stdout.fileno()):
             if message:
-                print percent, '%  ', message
+                print(percent, '%  ', message)
             else:
-                print percent, '%  '
+                print(percent, '%  ')
             return
         inline_msg_len = 0
         if message:
@@ -118,7 +120,8 @@ class ProgressBar(object):
         # Check if render is called for the first time
         if self.progress != None:
             self.clear()
-        self.progress = (bar_width * percent) / 100
+        self.progress = int((bar_width * percent) / 100)
+
         data = self.TEMPLATE % {
             'percent': percent,
             'color': self.color,
@@ -131,6 +134,7 @@ class ProgressBar(object):
         sys.stdout.flush()
         # The number of lines printed
         self.lines = len(data.splitlines())
+
     def clear(self):
         """Clear all printed lines"""
         if not self.enabled: return
@@ -139,6 +143,9 @@ class ProgressBar(object):
                 return
         except AttributeError:
             return
-        sys.stdout.write(
-            self.lines * (terminal.UP + terminal.BOL + terminal.CLEAR_EOL)
-        )
+        # sys.stdout.write((
+        #     f"{self.lines * (terminal.UP + terminal.BOL + terminal.CLEAR_EOL)}"
+        # ))
+        print((
+            f"{self.lines * (terminal.UP + terminal.BOL + terminal.CLEAR_EOL)}"
+        ))

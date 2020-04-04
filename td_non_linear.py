@@ -109,7 +109,7 @@ class NonLinearBBO(OffPolicyValueFunctionPredictor):
         res = self.__dict__.copy()
         for n in ("alpha", ):
             if isinstance(res[n], itertools.repeat):
-                res[n] = res[n].next()
+                res[n] = next(res[n])
 
         network = res.pop('network')
         assert 'network' not in res, res['network']
@@ -223,7 +223,7 @@ class NonLinearBBO(OffPolicyValueFunctionPredictor):
 
         f_gradients = tape.gradient(f_loss, self.network.trainable_variables)
         self.network_optimizer.apply_gradients(
-            zip(f_gradients, self.network.trainable_variables))
+            list(zip(f_gradients, self.network.trainable_variables)))
 
         # b_j = np.atleast_2d(self.phi(np.array([np.random.choice(self.D_s)])))
         b_j = [b_N, b_N_next][np.random.choice(2)]
@@ -236,16 +236,16 @@ class NonLinearBBO(OffPolicyValueFunctionPredictor):
 
         V_gradients = tape.gradient(V_loss, self.V_fn.trainable_variables)
         self.V_fn_optimizer.apply_gradients(
-            zip(V_gradients, self.V_fn.trainable_variables))
+            list(zip(V_gradients, self.V_fn.trainable_variables)))
 
-        print("V_loss: {:.3f}, f_loss: {:.3f}, f_i: {:.3f}, tau: {:.3f}, f_j: {:.3f}, V_j: {:.3f}"
+        print(("V_loss: {:.3f}, f_loss: {:.3f}, f_i: {:.3f}, tau: {:.3f}, f_j: {:.3f}, V_j: {:.3f}"
               "".format(
                   V_loss.numpy().squeeze().item(),
                   f_loss.numpy().squeeze().item(),
                   f.numpy().squeeze().item(),
                   target.numpy().squeeze().item(),
                   f_j.numpy().squeeze().item(),
-                  V_j.numpy().squeeze().item()))
+                  V_j.numpy().squeeze().item())))
 
         self._toc()
 
@@ -286,7 +286,7 @@ class NonLinearBBOV2(NonLinearBBO):
             f_gradients, self.network.trainable_variables, phi_0s)
 
         self.network_optimizer.apply_gradients(
-            zip(phi_updates, self.network.trainable_variables))
+            list(zip(phi_updates, self.network.trainable_variables)))
 
         # tree.map_structure(
         #     lambda phi, phi_delta: phi.assign_add(
@@ -308,7 +308,7 @@ class NonLinearBBOV2(NonLinearBBO):
             lambda V_grad: +1.0 * (V_j - f_j)[0] * V_grad, V_j_gradients)
 
         self.V_fn_optimizer.apply_gradients(
-            zip(omega_updates, self.V_fn.trainable_variables))
+            list(zip(omega_updates, self.V_fn.trainable_variables)))
 
         # tree.map_structure(
         #     lambda omega, omega_delta: omega.assign_add(
@@ -374,7 +374,7 @@ class NonLinearTD0(OffPolicyValueFunctionPredictor):
         res = self.__dict__
         for n in ["alpha"]:
             if isinstance(res[n], itertools.repeat):
-                res[n] = res[n].next()
+                res[n] = next(res[n])
 
         V_fn = res.pop('V_fn')
         assert 'V_fn' not in res, res['V_fn']
@@ -444,10 +444,10 @@ class NonLinearTD0(OffPolicyValueFunctionPredictor):
 
         gradients = tape.gradient(loss, self.V_fn.trainable_variables)
         self.optimizer.apply_gradients(
-            zip(gradients, self.V_fn.trainable_variables))
+            list(zip(gradients, self.V_fn.trainable_variables)))
 
         logging.debug("TD Learning Delta {}".format(loss))
-        print("TD Learning Delta {}".format(loss))
+        print(("TD Learning Delta {}".format(loss)))
 
         # al = self.alpha.next()
         # # if isinstance(self.alpha,  RMalpha):

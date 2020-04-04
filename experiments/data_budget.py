@@ -31,7 +31,7 @@ mdp = examples.NLinkPendulumMDP(
 phi = features.squared_tri((2 * dim) * (2 * dim + 1) / 2 + 1)
 
 n_feat = phi.dim
-print phi.dim, "features"
+print((phi.dim, "features"))
 theta_p, _, _ = dp.solve_LQR(mdp, gamma=gamma)
 theta_p = np.array(theta_p)
 theta_o = theta_p.copy()
@@ -146,7 +146,7 @@ if __name__ == "__main__":
         for s in range(n_indep):
             jobs.append((run, [s], {}))
         res = Parallel(n_jobs=n_jobs, verbose=verbose)(jobs)
-        res, proc, times = zip(*res)
+        res, proc, times = list(zip(*res))
         res = np.array(res)
         times = np.array(times)
         proc = np.array(proc)

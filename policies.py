@@ -7,10 +7,11 @@ import numpy as np
 import util
 
 
-@util.memory.cache(hashfun={"policy": repr})
+# @util.memory.cache(hashfun={"policy": repr})
+@util.memory.cache
 def mean_action_trajectory(policy, states):
     ret = np.empty((states.shape[0], policy.dim_A))
-    for i in xrange(states.shape[0]):
+    for i in range(states.shape[0]):
         ret[i] = policy.mean(states[i])
     return ret
 
@@ -107,7 +108,7 @@ class MarcsPolicy(NoisyContinuous):
             self.mlab.addpath("./mlab_cartpole")
             self.mlab.load(filename)
         except Exception:
-            print "Could not init mlabwrap"
+            print("Could not init mlabwrap")
             self.mlab = None
         self.filename = filename
         self.cnt=0
@@ -133,13 +134,13 @@ class MarcsPolicy(NoisyContinuous):
             try:
                 from mlabwrap import mlab
                 self.mlab = mlab
-                print "Restore old MLAB", self.mlab._session
+                print(("Restore old MLAB", self.mlab._session))
                 self.mlab._autosync_dirs = False
                 self.mlab.addpath("./mlab_cartpole")
                 self.mlab.load(self.filename)
-            except Exception, e:
-                print e
-                print mlab._session
+            except Exception as e:
+                print(e)
+                print((mlab._session))
                 self.mlab = None
 
     def mean(self, s):

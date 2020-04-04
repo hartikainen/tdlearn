@@ -40,7 +40,7 @@ W            W
         self.world = world
         n = 15
         actions = ["l", "u", "r", "d"]
-        states = range(n ** 2)
+        states = list(range(n ** 2))
         s = "".join(world)
         assert(len(s) == n ** 2)
 
@@ -255,8 +255,8 @@ class ActionMDP(mdp.MDP):
         """
         n_s = n
         n_a = n
-        actions = range(n_a)
-        states = range(n_s)
+        actions = list(range(n_a))
+        states = list(range(n_s))
 
         d0 = np.ones((n_s))
         d0 = d0 / d0.sum()
@@ -284,8 +284,8 @@ class RandomMDP(mdp.MDP):
             np.random.seed(seed)
         n_s = n_states
         n_a = n_actions
-        actions = range(n_a)
-        states = range(n_s)
+        actions = list(range(n_a))
+        states = list(range(n_s))
 
         d0 = np.random.rand(n_s) + 1e-5
         d0 = d0 / d0.sum()
@@ -347,7 +347,7 @@ class PendulumSwingUpCartPole(mdp.ContinuousMDP):
         return ds
 
     def ode_jac(self, s, t, a, m, l, M, b):
-        print "jAC CALLED"
+        print("jAC CALLED")
         g = 9.81
         c3 = np.cos(s[3])
         s3 = np.sin(s[3])
@@ -445,7 +445,7 @@ class CorruptedChain(mdp.MDP):
 
     def __init__(self, n_states):
         n = n_states
-        states = range(n)
+        states = list(range(n))
         actions = ["l", "r"]
         d0 = np.ones(n)
         d0 /= d0.sum()
@@ -481,7 +481,7 @@ class RandomWalkChain(mdp.MDP):
             p_plus: probability of going right
         """
         n_s = n_states
-        states = range(n_s)
+        states = list(range(n_s))
         actions = [0, ]
         d0 = np.zeros(n_s)
         d0[n_s / 2] = 1
@@ -537,7 +537,7 @@ class BoyanChain(mdp.MDP):
         assert n_states >= n_feat
         n_s = n_states
         self.n_feat = n_feat
-        states = range(n_s)
+        states = list(range(n_s))
         actions = [0, ]
         d0 = np.zeros(n_s)
         d0[0] = 1
@@ -580,7 +580,7 @@ class BairdStarExample(mdp.MDP):
         # start uniformly
         d0 = np.ones((n_s), dtype="double") / n_s
 
-        mdp.MDP.__init__(self, range(1, n_corners + 1) + ["center", ],
+        mdp.MDP.__init__(self, list(range(1, n_corners + 1)) + ["center", ],
                          actions, r, P, d0)
 
 

@@ -21,13 +21,13 @@ parser.add_argument("-b", "--batchsize", help="Number of parameter-settings to t
 parser.add_argument("-n","--njobs", help="Number of cores to use", type=int, default=-2)
 args = parser.parse_args()
 if args.experiment != None:
-    exec "from experiments."+args.experiment+" import *"
+    exec("from experiments."+args.experiment+" import *")
 else:
     try:
-        print "Experiment", exp_name
-        exec "from experiments."+exp_name+" import *"
+        print(("Experiment", exp_name))
+        exec("from experiments."+exp_name+" import *")
     except:
-        print "You have to specify the experiment"
+        print("You have to specify the experiment")
 ls_alphas = [0.001, 0.01, 0.1, 0.3, 0.5, 0.7, 0.8, 0.9, 1.0]
 alphas = [0.0002, 0.0005] + list(np.arange(0.001, .01, 0.001)) + list(
     np.arange(0.01, 0.1, 0.01)) + [0.1, 0.2, 0.3, 0.4, 0.5]
@@ -67,10 +67,10 @@ def load_result_file(fn, maxerr=5):
     with open(fn) as f:
         d = pickle.load(f)
     for i in range(d["res"].shape[-1]):
-        print d["criteria"][i], np.nanmin(d["res"][...,i])
+        print((d["criteria"][i], np.nanmin(d["res"][...,i])))
         best = d["params"][np.nanargmin(d["res"][...,i])]
         for n, v in zip(d["param_names"], best):
-            print n, v
+            print((n, v))
     return d
 
 
@@ -89,8 +89,8 @@ def plot_2d_error_grid(criterion, res, param_names, params, criteria, maxerr=5, 
         vmin=np.nanmin(ferr), vmax=np.nanmax(ferr)))
     p1 = kwargs[param_names[0]]
     p2 = kwargs[param_names[1]]
-    plt.yticks(range(len(p1)), p1)
-    plt.xticks(range(len(p2)), p2, rotation=45, ha="right")
+    plt.yticks(list(range(len(p1))), p1)
+    plt.xticks(list(range(len(p2))), p2, rotation=45, ha="right")
     plt.xlabel(param_names[1])
     plt.ylabel(param_names[0])
     plt.colorbar()
@@ -125,38 +125,38 @@ def gridsearch(method, gs_name="", njobs=-2, batchsize=3, **params):
         gs_name = "_" + gs_name
     fn = "data/{}/{}{}.pck".format(name, method.__name__, gs_name)
     if os.path.exists(fn):
-        print "Already exists: {}{}".format(method.__name__, gs_name)
+        print(("Already exists: {}{}".format(method.__name__, gs_name)))
         load_result_file(fn)
         return
-    param_names = params.keys()
+    param_names = list(params.keys())
     param_list = list(itertools.product(*[params[k] for k in param_names]))
     param_lengths = [len(params[k]) for k in param_names]
     k = []
     i = 0
     while i < len(param_list):
         j = min(i + batchsize, len(param_list)+1)
-        par = [dict(zip(param_names, p)) for p in param_list[i:j]]
+        par = [dict(list(zip(param_names, p))) for p in param_list[i:j]]
         k.append(delayed(run)(method, par))
         i = j
 
-    print "Starting {} {}{}".format(name, method.__name__, gs_name)
+    print(("Starting {} {}{}".format(name, method.__name__, gs_name)))
     res1 = Parallel(n_jobs=njobs, verbose=11)(k)
     res = np.vstack(res1)
     for i,c in enumerate(criteria):
         j = np.nanargmin(res[:,i].flatten())
-        print "best parameters for {} with value {}:".format(c, np.nanmin(res[:,i]))
-        print zip(param_names, param_list[j])
+        print(("best parameters for {} with value {}:".format(c, np.nanmin(res[:,i]))))
+        print((list(zip(param_names, param_list[j]))))
     res = np.array(res).reshape(*(param_lengths + [len(criteria)]))
     if not os.path.exists("data/{name}".format(name=name)):
         os.makedirs("data/{name}".format(name=name))
     with open(fn, "w") as f:
         pickle.dump(dict(res=res, params=param_list, criteria=criteria,
                     param_names=param_names, **params), f)
-    print "Finished {} {}{}".format(name, method.__name__, gs_name)
+    print(("Finished {} {}{}".format(name, method.__name__, gs_name)))
 
 
 def gridsearch_cluster(method, experiment, filename=None, gs_name="", batchsize=3, **params):
-    param_names = params.keys()
+    param_names = list(params.keys())
     param_list = list(itertools.product(*[params[k] for k in param_names]))
     param_lengths = [len(params[k]) for k in param_names]
     #k = (delayed(run)(method, dict(zip(param_names, p))) for p in param_list)
@@ -168,7 +168,7 @@ def gridsearch_cluster(method, experiment, filename=None, gs_name="", batchsize=
     i = 0
     basestr = "python experiments/gs_cluster.py {method} -e {exp}".format(method=method.__name__,
                                                                           exp=experiment)
-    param_l = zip(*param_list)
+    param_l = list(zip(*param_list))
     with open(filename, "w") as f:
 
         while i < len(param_list):
@@ -178,7 +178,7 @@ def gridsearch_cluster(method, experiment, filename=None, gs_name="", batchsize=
             for j in range(len(param_names)):
                 curstr += " " + " ".join(["--" + param_names[j]] +
                                          [repr(param_l[j][c]) for c in range(i, min(i + batchsize, len(param_list)))])
-            print curstr
+            print(curstr)
             f.write(curstr + "\n")
             i += batchsize
 
@@ -188,7 +188,7 @@ if __name__ == "__main__":
     njobs = args.njobs
     batchsize = args.batchsize
     task.mu
-    task.fill_trajectory_cache(range(gs_indep), n_samples=l, n_eps=n_eps)
+    task.fill_trajectory_cache(list(range(gs_indep)), n_samples=l, n_eps=n_eps)
     gridsearch(td.ResidualGradient, alpha=alphas, batchsize=batchsize, njobs=njobs)
     gridsearch(td.ResidualGradientDS, alpha=alphas, batchsize=batchsize, njobs=njobs)
     gridsearch(td.LinearTDLambda, alpha=alphas, lam=lambdas, batchsize=batchsize, njobs=njobs)

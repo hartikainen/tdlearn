@@ -59,7 +59,7 @@ class LinearValuePredictionTask(object):
         err_f = self._init_error_fun(criterion)
         min_errors = np.ones(len(methods)) * np.inf
 
-        for i in xrange(n_eps):
+        for i in range(n_eps):
             for m in methods:
                 m.reset_trace()
             cur_seed = i + n_samples * seed if seed is not None else None
@@ -109,7 +109,7 @@ class LinearValuePredictionTask(object):
         for m in methods:
             m.init_deterministic(self)
 
-        for i in xrange(n_samples):
+        for i in range(n_samples):
             for j, m in enumerate(methods):
                 cur_theta = m.deterministic_update()
                 errors[j, i] = err_f(cur_theta)
@@ -122,7 +122,7 @@ class LinearValuePredictionTask(object):
         for m in methods:
             m.init_deterministic(self)
 
-        for i in xrange(n_samples):
+        for i in range(n_samples):
             for j, m in enumerate(methods):
                 cur_theta = m.deterministic_update()
                 param[j, i, :] = cur_theta
@@ -214,7 +214,7 @@ class LinearValuePredictionTask(object):
                 jobs.append((tmp3, [self, methods], kwargs))
 
             res = Parallel(n_jobs=n_jobs, verbose=verbose)(jobs)
-        errors, times = zip(*res)
+        errors, times = list(zip(*res))
 
         errors = np.array(errors).swapaxes(0, 1)
         return np.mean(errors, axis=1), np.std(errors, axis=1), np.mean(times, axis=0)
@@ -235,7 +235,7 @@ class LinearValuePredictionTask(object):
 
         method.reset_trace()
         if hasattr(method, "lam") and method.lam > 0.:
-            print "WARNING: reuse of samples only works without e-traces"
+            print("WARNING: reuse of samples only works without e-traces")
 
         # Generate trajectories
         with Timer("Generate Samples", active=(verbose > 1.)):
@@ -248,7 +248,7 @@ class LinearValuePredictionTask(object):
                 policy=self.behavior_policy,
                 states=s, seed=seed)
         if eval_on_traces:
-            print "Evaluation of traces samples"
+            print("Evaluation of traces samples")
             self.set_mu_from_states(
                 seed=self.mu_seed, s=s, n_samples_eval=n_samples_eval)
 
@@ -355,7 +355,7 @@ class LinearValuePredictionTask(object):
                 policy=self.behavior_policy,
                 states=s, seed=seed)
         if eval_on_traces:
-            print "Evaluation of traces samples"
+            print("Evaluation of traces samples")
             self.set_mu_from_states(
                 seed=self.mu_seed, s=s, n_samples_eval=n_samples_eval)
 
@@ -371,7 +371,7 @@ class LinearValuePredictionTask(object):
 
         # Method learning
         with ProgressBar(enabled=(verbose > 2.)) as p:
-            for i in xrange(n_samples * n_eps):
+            for i in range(n_samples * n_eps):
                 p.update(i, n_samples * n_eps)
                 f0 = self.phi(s[i])
                 f1 = self.phi(s_n[i])
@@ -444,7 +444,7 @@ class LinearValuePredictionTask(object):
 
         # Method learning
         with ProgressBar(enabled=(verbose > 2.)) as p:
-            for i in xrange(n_samples * n_eps):
+            for i in range(n_samples * n_eps):
                 p.update(i, n_samples * n_eps)
                 f0 = self.phi(s[i])
                 f1 = self.phi(s_n[i])
@@ -778,7 +778,7 @@ class LinearContinuousValuePredictionTask(LinearValuePredictionTask):
         self.mu, self.mu_r, self.mu_next, self.mu_phi, self.mu_phi_next = mdp.samples_distribution_from_states(self.mdp, policy=self.target_policy, phi=self.phi, states=s[:n_samples_eval, :],
                                                                                                                n_next=self.mu_n_next,
                                                                                                                seed=self.mu_seed)
-        print "Mu set to trajectory samples"
+        print("Mu set to trajectory samples")
 
     def set_mu_from_states(self, s, seed=1, n_samples_eval=6000):
 
@@ -787,7 +787,7 @@ class LinearContinuousValuePredictionTask(LinearValuePredictionTask):
         self.mu, self.mu_r, self.mu_next, self.mu_phi, self.mu_phi_next = mdp.samples_distribution_from_states(self.mdp, policy=self.target_policy, phi=self.phi, states=s[:n_samples_eval, :],
                                                                                                                n_next=self.mu_n_next,
                                                                                                                seed=seed)
-        print "Mu set to trajectory samples"
+        print("Mu set to trajectory samples")
 
 
 class LinearLQRValuePredictionTask(LinearContinuousValuePredictionTask):

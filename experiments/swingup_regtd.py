@@ -37,7 +37,7 @@ means2, sigmas2 = features.make_grid(n_slices2, bounds)
 #A = util.apply_rowise(arr=states, f=phi)
 #a = np.nonzero(np.sum(A > 0.05, axis=0) > 5)[0]
 phi = features.gaussians(means, sigmas, constant=True)
-print phi.dim, "features are used"
+print((phi.dim, "features are used"))
 theta0 = 0. * np.ones(phi.dim)
 
 task = LinearContinuousValuePredictionTask(

@@ -14,7 +14,8 @@ def _false(x):
     return False
 
 
-@memory.cache(hashfun={"mymdp": repr, "policy": repr}, ignore=["verbose"])
+# # @memory.cache(hashfun={"mymdp": repr, "policy": repr}, ignore=["verbose"])
+@memory.cache
 def samples_cached(mymdp, policy, n_iter=1000, n_restarts=100,
                    no_next_noise=False, seed=1., verbose=0.):
     assert(seed is not None)
@@ -44,7 +45,8 @@ def samples_cached(mymdp, policy, n_iter=1000, n_restarts=100,
     return states, actions, rewards, states_next, restarts
 
 
-@memory.cache(hashfun={"mymdp": repr, "policy": repr})
+# @memory.cache(hashfun={"mymdp": repr, "policy": repr})
+@memory.cache
 def samples_cached_transitions(mymdp, policy, states, seed=2):
     assert(seed is not None)
     n = states.shape[0]
@@ -53,7 +55,7 @@ def samples_cached_transitions(mymdp, policy, states, seed=2):
     rewards = np.ones(n)
     np.random.seed(seed)
 
-    for k in xrange(n):
+    for k in range(n):
         _, a, s_n, r = mymdp.sample_step(states[k], policy=policy)
         states_next[k, :] = s_n
         rewards[k] = r
@@ -62,7 +64,8 @@ def samples_cached_transitions(mymdp, policy, states, seed=2):
     return actions, rewards, states_next
 
 
-@memory.cache(hashfun={"mymdp": repr, "policy": repr}, ignore=["verbose"])
+# @memory.cache(hashfun={"mymdp": repr, "policy": repr}, ignore=["verbose"])
+@memory.cache
 def samples_distribution_from_states(mymdp, policy, phi, states, n_next=20, seed=1, verbose=True):
     n = states.shape[0]
     states_next = np.ones([n, mymdp.dim_S])
@@ -72,7 +75,7 @@ def samples_distribution_from_states(mymdp, policy, phi, states, n_next=20, seed
     np.random.seed(seed)
 
     with ProgressBar(enabled=verbose) as p:
-        for k in xrange(n):
+        for k in range(n):
             p.update(k, n, "Sampling MDP Distribution")
             s = states[k, :]
             s0, a, s1, r = mymdp.sample_step(
@@ -87,7 +90,8 @@ def samples_distribution_from_states(mymdp, policy, phi, states, n_next=20, seed
     return states, rewards, states_next, feat, feat_next
 
 
-@memory.cache(hashfun={"mymdp": repr, "policy": repr, "policy_traj": repr}, ignore=["verbose"])
+# @memory.cache(hashfun={"mymdp": repr, "policy": repr, "policy_traj": repr}, ignore=["verbose"])
+@memory.cache
 def samples_distribution(mymdp, policy, phi, policy_traj=None, n_subsample=1,
                          n_iter=1000, n_restarts=100, n_next=20, seed=1, verbose=True):
     assert(n_subsample == 1)  # not implemented, do that if you need it
@@ -104,7 +108,7 @@ def samples_distribution(mymdp, policy, phi, policy_traj=None, n_subsample=1,
     s = mymdp.start()
     c = 0
     with ProgressBar(enabled=verbose) as p:
-        for k in xrange(n_restarts * n_iter):
+        for k in range(n_restarts * n_iter):
             if mymdp.terminal_f(s) or c >= n_iter:
                 s = mymdp.start()
                 c = 0
@@ -126,13 +130,14 @@ def samples_distribution(mymdp, policy, phi, policy_traj=None, n_subsample=1,
 def run1(*args, **kwargs):
     return accum_reward_for_states(*args, **kwargs)
 
-@memory.cache(hashfun={"mymdp": repr, "policy": repr}, ignore=["verbose", "n_jobs"])
+# @memory.cache(hashfun={"mymdp": repr, "policy": repr}, ignore=["verbose", "n_jobs"])
+@memory.cache
 def accum_reward_for_states(mymdp, policy, states, gamma, n_eps, l_eps, seed, verbose=3, n_jobs=24):
     n = states.shape[0]
     rewards = np.ones(n)
     if n_jobs == 1:
         with ProgressBar(enabled=(verbose >= 1)) as p:
-            for k in xrange(n):
+            for k in range(n):
                 p.update(k, n, "Sampling acc. reward")
                 np.random.seed(seed)
                 r = mymdp.sample_accum_reward(states[k], gamma, policy, n_eps=n_eps, l_eps=l_eps)
@@ -167,7 +172,7 @@ class ContinuousMDP(object):
             self.start_state = None
             startf = start
         self.start = startf
-        if isinstance(Sigma, (float, int, long)):
+        if isinstance(Sigma, (float, int)):
             self.Sigma = Sigma * np.ones(self.dim_S)
         else:
             assert Sigma.shape == (self.dim_S,)
@@ -194,7 +199,7 @@ class ContinuousMDP(object):
         actions = np.empty((n_restarts * n_iter, self.dim_A))
         rewards = np.empty((n_restarts * n_iter))
         k = 0
-        for i in xrange(n_restarts):
+        for i in range(n_restarts):
             for s, a, s_n, r in self.sample_transition(
                 n_iter, policy, with_restart=False,
                     no_next_noise=no_next_noise, seed=seed):
@@ -224,8 +229,8 @@ class ContinuousMDP(object):
         feats_next = np.empty(
             [int(n_restarts * n_iter / float(n_subsample)), n_feat])
         i = 0
-        l = range(0, n_restarts * n_iter * n_next, n_subsample)
-        for k in xrange(n_iter * n_restarts):
+        l = list(range(0, n_restarts * n_iter * n_next, n_subsample))
+        for k in range(n_iter * n_restarts):
             if k % n_subsample == 0:
                 feats[i, :] = phi(s[k])
                 feats_next[i, :] = phi(sn[k])
@@ -274,12 +279,12 @@ class ContinuousMDP(object):
 
     def sample_accum_reward(self, s0, gamma, policy, n_eps=10, l_eps=200):
         r = np.zeros(n_eps)
-        for n in xrange(n_eps):
+        for n in range(n_eps):
             s = s0
             g = 1.
             rands = np.random.randn(
                 l_eps, self.dim_S) * np.sqrt(self.Sigma[None, :])
-            for l in xrange(l_eps):
+            for l in range(l_eps):
                 a = policy(s, 1)
                 s = self.sf(s,a)
                 r[n] += self.rf(s,a) * g
@@ -305,7 +310,7 @@ class ContinuousMDP(object):
         else:
             s1 = np.zeros((n_samples, self.dim_S))
             r = np.zeros(n_samples)
-            for i in xrange(n_samples):
+            for i in range(n_samples):
                 s1[i, :] = self.sf(s0, a[i])
                 r[i] = self.rf(s0, a[i])
             s1 += rands
@@ -336,7 +341,7 @@ class LQRMDP(ContinuousMDP):
         self.Q = Q
         self.R = R
         self.terminal_f = terminal_f
-        if isinstance(Sigma, (float, int, long)):
+        if isinstance(Sigma, (float, int)):
             self.Sigma = np.ones(self.dim_S) * Sigma
             #self.Sigma = np.eye(self.dim_S) * float(Sigma)
         else:
@@ -443,7 +448,7 @@ class MDP(object):
              R: associated reward
         """
         transitions = []
-        for i in xrange(0, len(episode) - 2, 2):
+        for i in range(0, len(episode) - 2, 2):
             s, a, s_n = tuple(episode[i:i + 3])
             transitions.append((s, a, s_n, self.r[s, a, s_n]))
 
@@ -511,7 +516,7 @@ class MDP(object):
         sn = np.zeros_like(states)
         a = np.ones([n, self.dim_A])
         r = np.ones(n)
-        for i in xrange(n):
+        for i in range(n):
             a[i] = policy(states[i])
             sn[i] = multinomial_sample(1, self.P[int(states[i]), int(a[i])])
             r[i] = self.r[int(states[i]), int(a[i]), int(sn[i])]
@@ -527,7 +532,7 @@ class MDP(object):
         feats = np.empty([n_restarts * n_iter, n_feat])
         feats_next = np.empty([n_restarts * n_iter, n_feat])
 
-        for k in xrange(n_iter * n_restarts):
+        for k in range(n_iter * n_restarts):
 
             feats[k, :] = phi(s[k])
             feats_next[k, :] = phi(sn[k])

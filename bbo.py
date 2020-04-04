@@ -1,4 +1,4 @@
-from __future__ import division
+
 
 from collections import OrderedDict
 import tensorflow as tf

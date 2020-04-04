@@ -22,7 +22,7 @@ def plot_errorbar(title, methods, mean, std, l, error_every, criterion,
         plt.title(title)
 
     k = criteria.index(criterion)
-    x = range(0, l * n_eps, error_every) if not episodic else range(n_eps)
+    x = list(range(0, l * n_eps, error_every)) if not episodic else list(range(n_eps))
     if episodic:
         ee = int(n_eps / 8.)
     else:
@@ -30,7 +30,7 @@ def plot_errorbar(title, methods, mean, std, l, error_every, criterion,
     if ee < 1:
         ee = 1
     lss = ["-", "--", "-."]
-    ind_list = order if order is not None else range(len(methods))
+    ind_list = order if order is not None else list(range(len(methods)))
     for i in ind_list:
         m = methods[i]
         if hasattr(m, "hide") and m.hide:

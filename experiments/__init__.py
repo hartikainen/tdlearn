@@ -1,4 +1,4 @@
-from __future__ import division
+
 
 # -*- coding: utf-8 -*-
 """
@@ -31,10 +31,10 @@ def load_result_file(fn, maxerr=5):
     with open(fn) as f:
         d = pickle.load(f)
     for i in range(d["res"].shape[-1]):
-        print d["criteria"][i], np.nanmin(d["res"][..., i])
+        print((d["criteria"][i], np.nanmin(d["res"][..., i])))
         best = d["params"][np.nanargmin(d["res"][..., i])]
         for n, v in zip(d["param_names"], best):
-            print n, v
+            print((n, v))
     return d
 
 
@@ -89,8 +89,8 @@ def plot_2d_error_grid(
     p2 = kwargs[pn2]
     plt.title(title)
     if ticks:
-        plt.yticks(range(len(p2)), p2)
-        plt.xticks(range(len(p1)), p1, rotation=45, ha="right")
+        plt.yticks(list(range(len(p2))), p2)
+        plt.xticks(list(range(len(p1))), p1, rotation=45, ha="right")
         plt.xlabel(pn1)
         plt.ylabel(pn2)
         return f
@@ -115,7 +115,7 @@ def plot_path(path, method_id, methods, criterion, title):
     plt.xlabel("Regularization Parameter")
     plt.title(title + " " + methods[method_id].name)
 
-    par, theta, err = zip(*path[criterion][method_id])
+    par, theta, err = list(zip(*path[criterion][method_id]))
     plt.plot(par, err)
     plt.show()
 
@@ -153,7 +153,7 @@ def load_results(name, update_title=False):
 
 
 def replace_title(exp, data):
-    exec "from experiments." + exp + " import title"
+    exec("from experiments." + exp + " import title")
     data["title"] = title
     return data
 
@@ -164,16 +164,16 @@ def filter_methods(data, filter_fn=lambda data, method: False):
     for i, method in enumerate(data['methods']):
         if np.any(max_ys < np.max(data['mean'][i, ...], axis=-1)):
             method.hide = True
-            print("hiding: ", method.name)
+            print(("hiding: ", method.name))
         else:
-            print("not hiding: ", method.name)
+            print(("not hiding: ", method.name))
 
         # method.hide = (
         #     'BBO' in method.name or 1e-2 < method.alpha.alpha)
 
-        print(max_ys < np.max(data['mean'][i, ...], axis=-1))
+        print((max_ys < np.max(data['mean'][i, ...], axis=-1)))
         print(max_ys)
-        print(np.max(data['mean'][i, ...], axis=-1))
+        print((np.max(data['mean'][i, ...], axis=-1)))
 
         # names_to_filter = {'TD(0.0)', 'FPKF(0.0)', 'LSTD-JP(0)', 'LSPE(0.0)'}
         # for method in data['methods']:
@@ -211,9 +211,9 @@ def plot_errorbar(name, title, methods, mean, std, l, error_every, criterion,
         # axis.set_ylim(0, y_max)
 
         x = (
-            range(0, l * n_eps, error_every)
+            list(range(0, l * n_eps, error_every))
             if not episodic
-            else range(n_eps))
+            else list(range(n_eps)))
         if episodic:
             ee = int(n_eps / 8.)
         else:

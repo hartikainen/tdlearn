@@ -20,7 +20,7 @@ def estimate_V_discrete(mdp, n_iter=100000, policy="uniform", gamma=1.):
     r = mdp.r * policy.tab[:, :, np.newaxis]
     r = r.sum(axis=1)
     V = np.zeros(len(mdp.states))
-    for i in xrange(n_iter):
+    for i in range(n_iter):
         V_n = (P * (gamma * V + r)).sum(axis=1)
         if np.linalg.norm(V - V_n) < 1e-22:
             V = V_n
@@ -42,10 +42,10 @@ def estimate_V_LQR(lqmdp, bellman_op, n_iter=100000, gamma=1., eps=1e-14):
     T = bellman_op
     P = np.matrix(np.zeros((lqmdp.dim_S, lqmdp.dim_S)))
     b = 0.
-    for i in xrange(n_iter):
+    for i in range(n_iter):
         P_n, b_n = T(P, b)  # Q + theta.T * R * theta + gamma * (A+ B * theta).T * P * (A + B * theta)
         if np.linalg.norm(P - P_n) < eps and np.abs(b - b_n) < eps:
-            print "Converged estimating V after ", i, "iterations"
+            print(("Converged estimating V after ", i, "iterations"))
             break
         P = P_n
         b = b_n
@@ -93,12 +93,12 @@ def solve_LQR(lqmdp, n_iter=100000, gamma=1., eps=1e-14):
     theta = np.matrix(np.zeros((lqmdp.dim_A, lqmdp.dim_S)))
     A = np.matrix(lqmdp.A)
     B = np.matrix(lqmdp.B)
-    for i in xrange(n_iter):
+    for i in range(n_iter):
         theta_n = - gamma * np.linalg.pinv(R + gamma * B.T * P *
                                            B) * B.T * P * A
         P_n, b_n = bellman_operator(lqmdp, P, b, theta, gamma=gamma)  # Q + theta.T * R * theta + gamma * (A+ B * theta).T * P * (A + B * theta)
         if np.linalg.norm(P - P_n) < eps and np.abs(b - b_n) < eps and np.linalg.norm(theta - theta_n) < eps:
-            print "Converged estimating V after ", i, "iterations"
+            print(("Converged estimating V after ", i, "iterations"))
             break
         P = P_n
         b = b_n

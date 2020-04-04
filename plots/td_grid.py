@@ -51,8 +51,8 @@ f, p1, p2 = plot_2d_error_grid_file("data/lqr_imp_offpolicy/LinearTDLambda_fine_
 #plt.title("")
 plt.xlabel(r"$\lambda$")
 plt.ylabel(r"$\log(\alpha)$")
-plt.xticks(range(len(p1))[::4], p1[::4])
-plt.yticks(range(len(p2))[::3], [str(np.log10(a)) for a in p2][::3])
+plt.xticks(list(range(len(p1)))[::4], p1[::4])
+plt.yticks(list(range(len(p2)))[::3], [str(np.log10(a)) for a in p2][::3])
 save_figure("td_grid_lqr_imp_offpolicy", fig=f)
 
 f, p1, p2 = plot_2d_error_grid_file("data/disc_random_on/LinearTDLambda_fine_exp.pck",
@@ -61,8 +61,8 @@ f, p1, p2 = plot_2d_error_grid_file("data/disc_random_on/LinearTDLambda_fine_exp
 #plt.title("")
 plt.xlabel(r"$\lambda$")
 plt.ylabel(r"$\log(\alpha)$")
-plt.xticks(range(len(p1))[::4], p1[::4])
-plt.yticks(range(len(p2))[::3], [str(np.log10(a)) for a in p2][::3])
+plt.xticks(list(range(len(p1)))[::4], p1[::4])
+plt.yticks(list(range(len(p2)))[::3], [str(np.log10(a)) for a in p2][::3])
 
 
 #plt.title("")
@@ -73,8 +73,8 @@ f, p1, p2 = plot_2d_error_grid_file("data/lqr_full_onpolicy/LinearTDLambda_fine_
 #plt.title("")
 plt.xlabel(r"$\lambda$")
 plt.ylabel(r"$\log(\alpha)$")
-plt.xticks(range(len(p1))[::4], p1[::4])
-plt.yticks(range(len(p2))[::3], [str(np.log10(a)) for a in p2][::3])
+plt.xticks(list(range(len(p1)))[::4], p1[::4])
+plt.yticks(list(range(len(p2)))[::3], [str(np.log10(a)) for a in p2][::3])
 save_figure("td_grid_lqr_full_onpolicy", fig=f)
 
 f, p1, p2 = plot_2d_error_grid_file("data/boyan/LinearTDLambda_fine_exp.pck",
@@ -83,8 +83,8 @@ f, p1, p2 = plot_2d_error_grid_file("data/boyan/LinearTDLambda_fine_exp.pck",
 #plt.title("")
 plt.xlabel(r"$\lambda$")
 plt.ylabel(r"$\log(\alpha)$")
-plt.xticks(range(len(p1))[::4], p1[::4])
-plt.yticks(range(len(p2))[::3], [str(np.log10(a)) for a in p2][::3])
+plt.xticks(list(range(len(p1)))[::4], p1[::4])
+plt.yticks(list(range(len(p2)))[::3], [str(np.log10(a)) for a in p2][::3])
 
 
 #plt.title("")

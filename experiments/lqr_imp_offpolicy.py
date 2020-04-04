@@ -25,7 +25,7 @@ phi = features.squared_diag(4)
 
 n_feat = len(phi(np.zeros(mdp.dim_S)))
 theta_p, _, _ = dp.solve_LQR(mdp, gamma=gamma)
-print theta_p
+print(theta_p)
 theta_p = np.array(theta_p).flatten()
 theta_o = theta_p.copy()
 beh_policy = policies.LinearContinuous(theta=theta_o, noise=np.ones(1) * 0.01)

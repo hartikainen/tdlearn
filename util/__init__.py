@@ -2,7 +2,7 @@ import numpy as np
 from joblib import Memory
 
 
-memory = Memory(cachedir="./cache", verbose=0)
+memory = Memory(location="./cache", verbose=0)
 #memory = Memory(cachedir="/BS/latentCRF/nobackup/td", verbose=1)
 
 
@@ -49,7 +49,7 @@ def apply_rowise(f, arr):
 
     n = len(f(arr[0]))
     res = np.empty((arr.shape[0], n))
-    for i in xrange(arr.shape[0]):
+    for i in range(arr.shape[0]):
         res[i, :] = f(arr[i])
     #import ipdb; ipdb.set_trace()
     return res

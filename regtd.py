@@ -13,8 +13,8 @@ try:
     import cvxopt as co
     import cvxopt.solvers as solv
     import gurobipy as grb
-except Exception,e:
-    print e
+except Exception as e:
+    print(e)
     co = None
     solv = None
     grb = None
@@ -138,7 +138,7 @@ class LSTDl21(td.LinearValueFunctionPredictor, td.OffPolicyValueFunctionPredicto
             n = len(self.init_vals["theta"]) - 1
         else:
             n = len(self.init_vals["theta"])
-        for k, v in self.init_vals.items():
+        for k, v in list(self.init_vals.items()):
             if k == "theta":
                 continue
             self.__setattr__(k, copy.copy(v))
@@ -182,7 +182,7 @@ class LSTDl21(td.LinearValueFunctionPredictor, td.OffPolicyValueFunctionPredicto
         b = np.dot(self.Phi.view, np.dot(Sigma, self.b))
         alphas, _, coefs = lm.lars_path(A, b, eps=1e-6)
         #lst = [(model.alpha, model.coef_) for model in models]
-        return zip(alphas, coefs.T)
+        return list(zip(alphas, coefs.T))
 
     @property
     def theta(self):
@@ -205,8 +205,8 @@ class LSTDl21(td.LinearValueFunctionPredictor, td.OffPolicyValueFunctionPredicto
         P[np.isneginf(P)] = -1000.
         try:
             Sigma = np.linalg.pinv(P)
-        except np.linalg.LinAlgError, e:
-            print e
+        except np.linalg.LinAlgError as e:
+            print(e)
             return np.ones(n) * 1000
         Sigma = np.dot(np.dot(Phi_norm, Sigma), Phi_norm.T)
 
@@ -250,7 +250,7 @@ class LSTDl1(td.LSTDLambdaJP):
         b = self.b
         alphas, _, coefs = lm.lars_path(A, b, eps=1e-6)
         #lst = [(model.alpha, model.coef_) for model in models]
-        return zip(alphas, coefs.T)
+        return list(zip(alphas, coefs.T))
         #models = lm.lars_path(A, b, fit_intercept=False, eps=1e-7, normalize=False)
         #lst = [(model.alpha, model.coef_) for model in models]
         #return lst
@@ -327,12 +327,12 @@ class LarsTD(td.LSTDLambdaJP):
         while beta > tau + 1e-7:
             Il = list(I)
             Il.sort()
-            Ilc = list(set(xrange(n)) - I)
+            Ilc = list(set(range(n)) - I)
             # Find direction
             try:
                 dw = np.dot(np.linalg.pinv(A[Il][:, Il]), np.sign(c[Il]))
-            except np.linalg.LinAlgError, e:
-                print e
+            except np.linalg.LinAlgError as e:
+                print(e)
                 return res
             # Find step size for adding an element
 
@@ -362,7 +362,7 @@ class LarsTD(td.LSTDLambdaJP):
 
             theta[Il] += alpha * dw
             beta -= alpha
-            print beta
+            print(beta)
             c -= alpha * d
 
             # Update active set
@@ -426,8 +426,8 @@ class LSTDRP(td.LSTDLambdaJP):
 
             theta_t = np.dot(np.linalg.pinv(A), b)
             return np.dot(theta_t, proj).flatten()
-        except np.linalg.LinAlgError, e:
-            print e
+        except np.linalg.LinAlgError as e:
+            print(e)
             return np.zeros_like(self.b)
         finally:
             self._toc()

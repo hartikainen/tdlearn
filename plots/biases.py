@@ -9,7 +9,7 @@ exp_list = ["boyan_conv", "baird",
 
 tab = np.zeros((len(exp_list), 3))
 names = []
-print r"& MSTDE & MSBE & MSPBE \\"
+print(r"& MSTDE & MSBE & MSPBE \\")
 for j,exp in enumerate(exp_list):
     d = load_results(exp)
     c = -10000
@@ -29,4 +29,4 @@ for j,exp in enumerate(exp_list):
     i = np.argmin(np.array(l))
     l = ["{:.2f}".format(a) for a in l]
     l[i] = r"\bf{"+l[i]+"}"
-    print d["title"], "&", "&".join(l), r"\\"
+    print((d["title"], "&", "&".join(l), r"\\"))

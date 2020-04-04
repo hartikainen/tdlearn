@@ -118,7 +118,7 @@ if __name__ == "__main__":
         for s in range(n_indep):
             jobs.append((run, [s], {}))
         res = Parallel(n_jobs=n_jobs, verbose=verbose)(jobs)
-        res, el, tl = zip(*res)
+        res, el, tl = list(zip(*res))
         res = np.array(res)
         np.savez(fn, res=res, el=el, tl=tl,
                  title="Cartpole Swingup with {} features".format(phi.dim))

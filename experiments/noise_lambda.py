@@ -67,7 +67,7 @@ def lambda_errors(phi, lambdas, noises):
         val[mean[:, -1, n:] > mean[0, -1, 0]] = mean[0, -1, 0]
         val = val.mean(axis=1)
         mserrors[:, i] = val - np.mean(val)
-        print noise, lambdas[np.argmin(val)]
+        print((noise, lambdas[np.argmin(val)]))
     #mserrors -= mserrors.min(axis=1)[:,None]
     #mserrors /= mserrors.max(axis=1)[:,None]
     return mserrors

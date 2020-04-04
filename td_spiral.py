@@ -102,7 +102,7 @@ class SpiralNonLinearBBO(OffPolicyValueFunctionPredictor):
         res = self.__dict__.copy()
         for n in ("alpha", ):
             if isinstance(res[n], itertools.repeat):
-                res[n] = res[n].next()
+                res[n] = next(res[n])
 
         network = res.pop('network')
         assert 'network' not in res, res['network']
@@ -213,7 +213,7 @@ class SpiralNonLinearBBO(OffPolicyValueFunctionPredictor):
 
         f_gradients = tape.gradient(f_loss, self.network.trainable_variables)
         self.network_optimizer.apply_gradients(
-            zip(f_gradients, self.network.trainable_variables))
+            list(zip(f_gradients, self.network.trainable_variables)))
 
         b_j = np.atleast_2d(self.phi(np.array([np.random.choice(self.D_s)])))
         # b_j = [b_N, b_N_next][np.random.choice(2)]
@@ -227,16 +227,16 @@ class SpiralNonLinearBBO(OffPolicyValueFunctionPredictor):
 
         V_gradients = tape.gradient(V_loss, self.V_fn.trainable_variables)
         self.V_fn_optimizer.apply_gradients(
-            zip(V_gradients, self.V_fn.trainable_variables))
+            list(zip(V_gradients, self.V_fn.trainable_variables)))
 
-        print("V_loss: {:.3f}, f_loss: {:.3f}, f_i: {:.3f}, tau: {:.3f}, f_j: {:.3f}, V_j: {:.3f}"
+        print(("V_loss: {:.3f}, f_loss: {:.3f}, f_i: {:.3f}, tau: {:.3f}, f_j: {:.3f}, V_j: {:.3f}"
               "".format(
                   V_loss.numpy().squeeze().item(),
                   f_loss.numpy().squeeze().item(),
                   f.numpy().squeeze().item(),
                   target.numpy().squeeze().item(),
                   f_j.numpy().squeeze().item(),
-                  V_j.numpy().squeeze().item()))
+                  V_j.numpy().squeeze().item())))
 
         self._toc()
 
@@ -285,7 +285,7 @@ class SpiralNonLinearBilevel(SpiralNonLinearBBO):
         self.V_fn.set_weights([omega_1])
 
         _V_loss = np.abs(omega_0 - theta_0)
-        print("V_loss: {:.3f}, f_loss: {:.3f}, f_i: {:.3f}, tau: {:.3f}, s0: {}, s1: {}"
+        print(("V_loss: {:.3f}, f_loss: {:.3f}, f_i: {:.3f}, tau: {:.3f}, s0: {}, s1: {}"
               "".format(
                   _V_loss.item(),
                   delta.numpy().squeeze().item(),
@@ -293,7 +293,7 @@ class SpiralNonLinearBilevel(SpiralNonLinearBBO):
                   target.numpy().squeeze().item(),
                   int(s0),
                   int(s1),
-              ))
+              )))
 
         self._toc()
 
@@ -344,7 +344,7 @@ class SpiralNonLinearTD0(OffPolicyValueFunctionPredictor):
         res = self.__dict__
         for n in ["alpha"]:
             if isinstance(res[n], itertools.repeat):
-                res[n] = res[n].next()
+                res[n] = next(res[n])
 
         V_fn = res.pop('V_fn')
         assert 'V_fn' not in res, res['V_fn']
@@ -415,10 +415,10 @@ class SpiralNonLinearTD0(OffPolicyValueFunctionPredictor):
 
         gradients = tape.gradient(loss, self.V_fn.trainable_variables)
         self.optimizer.apply_gradients(
-            zip(gradients, self.V_fn.trainable_variables))
+            list(zip(gradients, self.V_fn.trainable_variables)))
 
         logging.debug("TD Learning Delta {}".format(loss))
-        print("TD Learning Delta {}".format(loss))
+        print(("TD Learning Delta {}".format(loss)))
 
         # al = self.alpha.next()
         # # if isinstance(self.alpha,  RMalpha):

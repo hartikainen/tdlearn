@@ -43,7 +43,7 @@ phi = features.gaussians(means, sigmas, constant=False)
 A = util.apply_rowise(arr=states, f=phi)
 a = np.nonzero(np.sum(A > 0.05, axis=0) > 20)[0]
 phi = features.gaussians(means[a], sigmas[a], constant=True)
-print phi.dim, "features are used"
+print((phi.dim, "features are used"))
 
 
 

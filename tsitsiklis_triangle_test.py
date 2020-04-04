@@ -1,3 +1,3 @@
-from examples import TsitsiklisTriangle
+from .examples import TsitsiklisTriangle
 
 tsitsiklis_triangle = TsitsiklisTriangle()

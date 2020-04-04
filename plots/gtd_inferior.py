@@ -3,7 +3,7 @@ import td
 #exp_list = filter(lambda x: x != "baird", exp_list)
 tab = np.zeros((len(exp_list), 3))
 names = []
-print r"& GTD & GTD2 & TDC & TD\\"
+print(r"& GTD & GTD2 & TDC & TD\\")
 for j,exp in enumerate(exp_list):
     e = load_results(exp, update_title=False)
     for i,m in enumerate(e["methods"]):
@@ -24,5 +24,5 @@ for j,exp in enumerate(exp_list):
         l = ["{:.2f}".format(a) for a in f]
     i = np.argmin(np.array(f))
     l[i] = r"\bf{"+l[i]+"}"
-    print e["title"], "&", " & ".join(l), r"\\"
+    print((e["title"], "&", " & ".join(l), r"\\"))
     #print e["title"], "&", "&".join(["{:.2f}".format(np.sum(e["mean"][i,k,:])) for i in [a,b,c,d]]), r"\\"

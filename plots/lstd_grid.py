@@ -37,7 +37,7 @@ f, p1, p2 = plot_2d_error_grid_file("data/lqr_full_offpolicy/RecursiveLSTDLambda
                             pn2="eps", cmap=cmap, ticks=False, transform=tr,
                                    settings={"lam": 0}, maxerr=5, figsize=(4,4))
 plt.xlabel(r"$\lambda$")
-plt.xticks(range(len(p1))[::4], p1[::4])
+plt.xticks(list(range(len(p1)))[::4], p1[::4])
 plt.gca().yaxis.set_visible(False)
 save_figure("lstd_grid_lqr_full_off", fig=f)
 
@@ -45,7 +45,7 @@ f,p1, p2 = plot_2d_error_grid_file("data/disc_random_on/RecursiveLSTDLambda_fine
                                   pn1="lam", pn2="eps", cmap=cmap, ticks=False, transform=tr,
                                   settings={"lam": 0}, maxerr=5, figsize=(4,4))
 plt.xlabel(r"$\lambda$")
-plt.xticks(range(len(p1))[::4], p1[::4])
+plt.xticks(list(range(len(p1)))[::4], p1[::4])
 plt.gca().yaxis.set_visible(False)
 save_figure("lstd_grid_disc_random_on", fig=f)
 
@@ -56,6 +56,6 @@ f, p1, p2 = plot_2d_error_grid_file("data/lqr_imp_offpolicy/RecursiveLSTDLambdaJ
 #plt.title("")
 plt.xlabel(r"$\lambda$")
 plt.ylabel(r"$\log(\epsilon)$")
-plt.xticks(range(len(p1))[::4], p1[::4])
-plt.yticks(range(len(p2))[::3], [str(np.log10(a)) for a in p2][::3])
+plt.xticks(list(range(len(p1)))[::4], p1[::4])
+plt.yticks(list(range(len(p2)))[::3], [str(np.log10(a)) for a in p2][::3])
 save_figure("lstd_grid_lqr_imp_off", fig=f)
