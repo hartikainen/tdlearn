@@ -15,7 +15,7 @@ class SpiralModel(tf.keras.Model):
         self._initial_omega = initial_omega
         self._epsilon = epsilon
         self.omega = self.add_weight(
-            'mu_hat',
+            'omega',
             shape=(),
             initializer=tf.initializers.constant(initial_omega))
 
