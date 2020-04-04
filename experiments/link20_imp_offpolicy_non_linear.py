@@ -16,11 +16,15 @@ from task import (
 from experiments import experiment_main
 
 
-gamma=0.95
+gamma = 0.95
 dt = 0.1
 dim = 20
 sigma = np.ones(2*dim)*0.01
-mdp = examples.NLinkPendulumMDP(np.ones(dim)*.5, np.ones(dim)*.6, sigma=sigma, dt=dt)
+mdp = examples.NLinkPendulumMDP(
+    np.ones(dim)*.5,
+    np.ones(dim)*.6,
+    sigma=sigma,
+    dt=dt)
 # phi = features.squared_diag(2*dim)
 phi = features.identity(2 * dim)
 
@@ -29,8 +33,9 @@ n_feat = len(phi(np.zeros(mdp.dim_S)))
 theta_p,_,_ = dp.solve_LQR(mdp, gamma=gamma)
 theta_p = np.array(theta_p)
 policy = policies.LinearContinuous(theta=theta_p, noise=np.ones(dim)*0.01)
-target_policy = policies.LinearContinuous(theta=theta_p, noise=np.ones(dim)*0.005)
-theta0 =  0.*np.ones(n_feat)
+target_policy = policies.LinearContinuous(
+    theta=theta_p, noise=np.ones(dim) * 5e-3)
+theta0 = 0.*np.ones(n_feat)
 
 # import ipdb; ipdb.set_trace(context=30)
 
@@ -115,8 +120,8 @@ episodic = False
 criterion = "MSE"
 criteria = ["MSE"]
 # criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
-title = "12. 20-link Lin. Pole Balancing Off-pol."
-name = "link20_imp_offpolicy"
+title = "Non-linear 20-link Lin. Pole Balancing Off-pol."
+name = "link20_imp_offpolicy_non_linear"
 
 
 if __name__ == "__main__":
