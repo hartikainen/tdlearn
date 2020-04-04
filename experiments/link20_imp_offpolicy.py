@@ -53,10 +53,10 @@ gtd.color = "r"
 methods.append(gtd)
 
 alpha, mu = 0.5, .01
-gtd = td.GTD2(alpha=alpha, beta=mu * alpha, phi=phi)
-gtd.name = r"GTD2 $\alpha$={} $\mu$={}".format(alpha, mu)
-gtd.color = "orange"
-methods.append(gtd)
+gtd2 = td.GTD2(alpha=alpha, beta=mu * alpha, phi=phi)
+gtd2.name = r"GTD2 $\alpha$={} $\mu$={}".format(alpha, mu)
+gtd2.color = "orange"
+methods.append(gtd2)
 
 alpha = td.RMalpha(0.7, 0.25)
 lam = .0
@@ -83,10 +83,10 @@ methods.append(tdc)
 lam = 0.0
 alpha = 0.06
 mu = .05
-tdc = td.GeriTDCLambda(alpha=alpha, mu = mu, lam=lam, phi=phi, gamma=gamma)
-tdc.name = r"GeriTDC({}) $\alpha$={} $\mu$={}".format(lam, alpha, mu)
-tdc.color = "b"
-methods.append(tdc)
+geri_tdc = td.GeriTDCLambda(alpha=alpha, mu = mu, lam=lam, phi=phi, gamma=gamma)
+geri_tdc.name = r"GeriTDC({}) $\alpha$={} $\mu$={}".format(lam, alpha, mu)
+geri_tdc.color = "b"
+methods.append(geri_tdc)
 
 alpha = .01
 lam = .0
@@ -112,28 +112,28 @@ methods.append(lstd)
 
 lam = 0.
 eps = 10
-lstd = td.RecursiveLSTDLambdaJP(lam=lam, eps=eps, phi=phi, gamma=gamma)
-lstd.name = r"LSTD({})-CO $\epsilon$={}".format(lam, eps)
-lstd.color = "g"
-lstd.ls = "-."
-methods.append(lstd)
+lstd_jp = td.RecursiveLSTDLambdaJP(lam=lam, eps=eps, phi=phi, gamma=gamma)
+lstd_jp.name = r"LSTD({})-CO $\epsilon$={}".format(lam, eps)
+lstd_jp.color = "g"
+lstd_jp.ls = "-."
+methods.append(lstd_jp)
 #
 alpha = 0.3
 beta=10.
 mins=0.
 lam = .0
-lstd = td.FPKF(lam=lam, alpha = alpha, beta=beta, mins=min,phi=phi, gamma=gamma)
-lstd.name = r"FPKF({}) $\alpha$={} $\beta$={} m={}".format(lam, alpha, beta, mins)
-lstd.color = "g"
-lstd.ls = "-."
-methods.append(lstd)
+fpkf = td.FPKF(lam=lam, alpha = alpha, beta=beta, mins=min,phi=phi, gamma=gamma)
+fpkf.name = r"FPKF({}) $\alpha$={} $\beta$={} m={}".format(lam, alpha, beta, mins)
+fpkf.color = "g"
+fpkf.ls = "-."
+methods.append(fpkf)
 
 alpha = .05
-rg = td.ResidualGradientDS(alpha=alpha, phi=phi, gamma=gamma)
-rg.name = r"RG DS $\alpha$={}".format(alpha)
-rg.color = "brown"
-rg.ls = "--"
-methods.append(rg)
+rg_ds = td.ResidualGradientDS(alpha=alpha, phi=phi, gamma=gamma)
+rg_ds.name = r"RG DS $\alpha$={}".format(alpha)
+rg_ds.color = "brown"
+rg_ds.ls = "--"
+methods.append(rg_ds)
 
 alpha = .04
 rg = td.ResidualGradient(alpha=alpha, phi=phi, gamma=gamma)
@@ -141,16 +141,17 @@ rg.name = r"RG $\alpha$={}".format(alpha)
 rg.color = "brown"
 methods.append(rg)
 
-brm = td.RecursiveBRMDS(phi=phi,eps=100)
-brm.name = "BRMDS"
-brm.color = "b"
-brm.ls = "--"
-methods.append(brm)
+brmds = td.RecursiveBRMDS(phi=phi,eps=100)
+brmds.name = "BRMDS"
+brmds.color = "b"
+brmds.ls = "--"
+methods.append(brmds)
 
 brm = td.RecursiveBRM(phi=phi, eps=1e5)
 brm.name = "BRM"
 brm.color = "b"
 methods.append(brm)
+
 
 l = 50000
 error_every = 500
