@@ -410,13 +410,14 @@ class LinearValuePredictionTask(object):
                         if not np.isfinite(np.sum(cur_theta)):
                             errors[k,:, int(i / error_every)] = np.nan
                             continue
-                        for i_e in range(len(criteria)):
+                        for i_e, criterion_name in enumerate(criteria):
                             if isinstance(m, td.LinearValueFunctionPredictor):
-                                errors[k, i_e, int(
-                                    i / error_every)] = err_f[i_e](cur_theta)
+                                error = err_f[i_e](cur_theta)
                             else:
-                                errors[k, i_e, int(
-                                    i / error_every)] = err_f_gen[i_e](m.V)
+                                error = err_f_gen[i_e](m.V)
+                            errors[k, i_e, int(i / error_every)] = error
+                            if criterion_name == 'MSE':
+                                print(f"{m.name}: MSE={error}")
 
         return errors
 

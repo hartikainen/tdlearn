@@ -238,14 +238,14 @@ class NonLinearBBO(OffPolicyValueFunctionPredictor):
         self.V_fn_optimizer.apply_gradients(
             list(zip(V_gradients, self.V_fn.trainable_variables)))
 
-        print(("V_loss: {:.3f}, f_loss: {:.3f}, f_i: {:.3f}, tau: {:.3f}, f_j: {:.3f}, V_j: {:.3f}"
-              "".format(
-                  V_loss.numpy().squeeze().item(),
-                  f_loss.numpy().squeeze().item(),
-                  f.numpy().squeeze().item(),
-                  target.numpy().squeeze().item(),
-                  f_j.numpy().squeeze().item(),
-                  V_j.numpy().squeeze().item())))
+        # print(("V_loss: {:.3f}, f_loss: {:.3f}, f_i: {:.3f}, tau: {:.3f}, f_j: {:.3f}, V_j: {:.3f}"
+        #       "".format(
+        #           V_loss.numpy().squeeze().item(),
+        #           f_loss.numpy().squeeze().item(),
+        #           f.numpy().squeeze().item(),
+        #           target.numpy().squeeze().item(),
+        #           f_j.numpy().squeeze().item(),
+        #           V_j.numpy().squeeze().item())))
 
         self._toc()
 
@@ -447,7 +447,7 @@ class NonLinearTD0(OffPolicyValueFunctionPredictor):
             list(zip(gradients, self.V_fn.trainable_variables)))
 
         logging.debug("TD Learning Delta {}".format(loss))
-        print(("TD Learning Delta {}".format(loss)))
+        # print(("TD Learning Delta {}".format(loss)))
 
         # al = self.alpha.next()
         # # if isinstance(self.alpha,  RMalpha):
