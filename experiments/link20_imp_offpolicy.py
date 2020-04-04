@@ -122,7 +122,7 @@ alpha = 0.3
 beta=10.
 mins=0.
 lam = .0
-fpkf = td.FPKF(lam=lam, alpha = alpha, beta=beta, mins=min,phi=phi, gamma=gamma)
+fpkf = td.FPKF(lam=lam, alpha = alpha, beta=beta, mins=mins,phi=phi, gamma=gamma)
 fpkf.name = r"FPKF({}) $\alpha$={} $\beta$={} m={}".format(lam, alpha, beta, mins)
 fpkf.color = "g"
 fpkf.ls = "-."
