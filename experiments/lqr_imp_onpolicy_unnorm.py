@@ -8,12 +8,10 @@ __author__ = "Christoph Dann <cdann@cdann.de>"
 import td
 import examples
 import numpy as np
-import matplotlib.pyplot as plt
 import dynamic_prog as dp
 import features
 import policies
 from task import LinearLQRValuePredictionTask
-import pickle
 from experiments import experiment_main
 
 

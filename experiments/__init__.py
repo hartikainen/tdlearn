@@ -28,7 +28,7 @@ exp_list = ["boyan", "baird",
 
 
 def load_result_file(fn, maxerr=5):
-    with open(fn) as f:
+    with open(fn, 'rb') as f:
         d = pickle.load(f)
     for i in range(d["res"].shape[-1]):
         print((d["criteria"][i], np.nanmin(d["res"][..., i])))
@@ -61,7 +61,7 @@ def plot_2d_error_grid_experiment(experiment, method, criterion, title=None, **k
 
 
 def plot_2d_error_grid_file(fn, criterion, **kwargs):
-    with open(fn) as f:
+    with open(fn, 'rb') as f:
         d = pickle.load(f)
     d.update(kwargs)
     return plot_2d_error_grid(criterion=criterion, **d)
@@ -125,7 +125,7 @@ def save_results(name, l, criteria, error_every, n_indep, n_eps, methods,
     if not os.path.exists("data/{name}".format(name=name)):
         os.makedirs("data/{name}".format(name=name))
 
-    with open("data/{name}/setting.pck".format(name=name), "w") as f:
+    with open("data/{name}/setting.pck".format(name=name), "wb") as f:
         pickle.dump(dict(l=l, criteria=criteria, gamma=gamma,
                          error_every=error_every,
                          n_indep=n_indep,
@@ -139,12 +139,12 @@ def save_results(name, l, criteria, error_every, n_indep, n_eps, methods,
 
 
 def load_results(name, update_title=False):
-    with open("data/{name}/setting.pck".format(name=name), "r") as f:
+    with open("data/{name}/setting.pck".format(name=name), "rb") as f:
         d = pickle.load(f)
 
     if update_title:
         replace_title(name, d)
-        with open("data/{name}/setting.pck".format(name=name), "w") as f:
+        with open("data/{name}/setting.pck".format(name=name), "wb") as f:
             pickle.dump(file=f, obj=d)
     d2 = np.load("data/{name}/results.npz".format(name=name))
     d.update(d2)

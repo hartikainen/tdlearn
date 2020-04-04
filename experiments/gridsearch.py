@@ -64,7 +64,7 @@ except:
     gs_ignore_first_n = 0
 
 def load_result_file(fn, maxerr=5):
-    with open(fn) as f:
+    with open(fn, 'rb') as f:
         d = pickle.load(f)
     for i in range(d["res"].shape[-1]):
         print((d["criteria"][i], np.nanmin(d["res"][...,i])))
@@ -75,7 +75,7 @@ def load_result_file(fn, maxerr=5):
 
 
 def plot_2d_error_grid_file(fn, criterion, maxerr=5):
-    with open(fn) as f:
+    with open(fn, 'rb') as f:
         d = pickle.load(f)
     plot_2d_error_grid(criterion=criterion, maxerr=maxerr, **d)
 
@@ -149,7 +149,7 @@ def gridsearch(method, gs_name="", njobs=-2, batchsize=3, **params):
     res = np.array(res).reshape(*(param_lengths + [len(criteria)]))
     if not os.path.exists("data/{name}".format(name=name)):
         os.makedirs("data/{name}".format(name=name))
-    with open(fn, "w") as f:
+    with open(fn, "wb") as f:
         pickle.dump(dict(res=res, params=param_list, criteria=criteria,
                     param_names=param_names, **params), f)
     print(("Finished {} {}{}".format(name, method.__name__, gs_name)))
