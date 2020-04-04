@@ -76,6 +76,8 @@ class NonLinearBBO(OffPolicyValueFunctionPredictor):
 
         self.init_vals['alpha'] = alpha
         self.alpha = self._assert_iterator(self.init_vals['alpha'])
+        self.prior = tfp.distributions.Normal(
+            loc=prior_mean, scale=prior_stddev)
 
         self.reset()
 
@@ -207,14 +209,14 @@ class NonLinearBBO(OffPolicyValueFunctionPredictor):
 
             prior_loss = tf.reduce_sum(tree.map_structure(
                 lambda phi: tf.reduce_mean(
-                    tf.losses.MSE(phi, tf.random.normal(
-                        tf.shape(phi),
-                        mean=self.prior_mean,
-                        stddev=self.prior_stddev))),
+                    0.5 * tf.losses.MSE(
+                        y_pred=phi,
+                        y_true=self.prior.sample(tf.shape(phi)))
+                    ),
                 tree.flatten(self.network.trainable_variables)))
 
-            f_loss = 1.0 * (
-                tf.losses.MSE(y_true=tf.stop_gradient(target), y_pred=f)
+            f_loss = (
+                0.5 * tf.losses.MSE(y_true=tf.stop_gradient(target), y_pred=f)
                 + prior_loss)
 
         # assert prior_loss == 0.0, prior_loss
@@ -227,11 +229,10 @@ class NonLinearBBO(OffPolicyValueFunctionPredictor):
         b_j = [b_N, b_N_next][np.random.choice(2)]
         assert b_j.shape == b_N.shape
 
+        f_j = self.network(b_j)
         with tf.GradientTape() as tape:
             V_j = self.V_fn(b_j)
-            f_j = self.network(b_j)
-            V_loss = 1.0 * tf.losses.MSE(
-                y_true=tf.stop_gradient(f_j), y_pred=V_j)
+            V_loss = 0.5 * tf.losses.MSE(y_pred=V_j, y_true=f_j)
 
         V_gradients = tape.gradient(V_loss, self.V_fn.trainable_variables)
         self.V_fn_optimizer.apply_gradients(
