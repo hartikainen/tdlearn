@@ -357,7 +357,7 @@ class NonLinearTD0(OffPolicyValueFunctionPredictor):
     def reset(self):
         OffPolicyValueFunctionPredictor.reset(self)
 
-        if not hasattr(self, 'network'):
+        if not hasattr(self, 'V_fn'):
             self.V_fn = feedforward_model(
                 hidden_layer_sizes=self.hidden_layer_sizes,
                 output_shape=(1, ),
@@ -371,7 +371,7 @@ class NonLinearTD0(OffPolicyValueFunctionPredictor):
             self.alpha = self._assert_iterator(self.init_vals['alpha'])
 
     def __getstate__(self):
-        res = self.__dict__
+        res = self.__dict__.copy()
         for n in ["alpha"]:
             if isinstance(res[n], itertools.repeat):
                 res[n] = next(res[n])
@@ -393,7 +393,7 @@ class NonLinearTD0(OffPolicyValueFunctionPredictor):
 
     def __setstate__(self, state):
         V_fn_state = state.pop('V_fn', None)
-        self.__dict__ = state
+        self.__dict__ = state.copy()
 
         if V_fn_state is not None:
             V_fn_config = V_fn_state['config']
