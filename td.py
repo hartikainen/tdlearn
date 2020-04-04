@@ -1511,9 +1511,11 @@ class RMalpha(object):
     def __iter__(self):
         return self
 
-    def next(self, **kwargs):
+    def __next__(self, **kwargs):
         self.t += 1.
         return self.c * self.t ** (-self.mu)
+
+    next = __next__
 
 
 class ConstAlpha(object):
@@ -1533,8 +1535,10 @@ class ConstAlpha(object):
     def __iter__(self):
         return self
 
-    def next(self, **kwargs):
+    def __next__(self, **kwargs):
         return self.alpha
+
+    next = __next__
 
 
 class DabneyAlpha(object):
@@ -1554,10 +1558,12 @@ class DabneyAlpha(object):
     def __iter__(self):
         return self
 
-    def next(self, el_trace, f0, f1, gamma, **kwargs):
+    def __next__(self, el_trace, f0, f1, gamma, **kwargs):
         self.alpha = min(self.alpha, np.abs(
             np.dot(el_trace, gamma*f1 - f0))**(-1))
         return self.alpha
+
+    next = __next__
 
 
 class ResidualGradient(OffPolicyValueFunctionPredictor, LinearValueFunctionPredictor):
