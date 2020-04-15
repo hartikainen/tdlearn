@@ -110,7 +110,6 @@ criterion = "MSE"
 criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
 eval_on_traces = False
 n_samples_eval = 10000
-verbose = 4
 gs_ignore_first_n = 10000
 gs_max_weight = 3.
 

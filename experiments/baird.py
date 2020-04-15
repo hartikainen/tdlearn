@@ -38,7 +38,7 @@ bbo = td.BBOV2(
     alpha,
     D_a=target_pol.dim_A,
     phi=phi)
-bbo.name = r"BBO $\alpha$={}".format(alpha)
+bbo.name = r"BBO".format()
 bbo.color = "black"
 methods.append(bbo)
 
@@ -52,10 +52,10 @@ methods.append(gtd)
 
 alpha = 0.005
 mu = 4.
-gtd = td.GTD2(alpha=alpha, beta=mu * alpha, phi=phi)
-gtd.name = r"GTD2 $\alpha$={} $\mu$={}".format(alpha, mu)
-gtd.color = "orange"
-methods.append(gtd)
+gtd2 = td.GTD2(alpha=alpha, beta=mu * alpha, phi=phi)
+gtd2.name = r"GTD2 $\alpha$={} $\mu$={}".format(alpha, mu)
+gtd2.color = "orange"
+methods.append(gtd2)
 
 
 alpha = .1
@@ -75,10 +75,10 @@ methods.append(tdc)
 
 alpha = 0.003
 mu = 8
-tdc = td.GeriTDC(alpha=alpha, beta=alpha * mu, phi=phi, gamma=gamma)
-tdc.name = r"GeriTDC $\alpha$={} $\mu$={}".format(alpha, mu)
-tdc.color = "c"
-methods.append(tdc)
+geri_tdc = td.GeriTDC(alpha=alpha, beta=alpha * mu, phi=phi, gamma=gamma)
+geri_tdc.name = r"GeriTDC $\alpha$={} $\mu$={}".format(alpha, mu)
+geri_tdc.color = "c"
+methods.append(geri_tdc)
 
 alpha = .02
 rg = td.ResidualGradient(alpha=alpha, phi=phi, gamma=gamma)
@@ -87,10 +87,10 @@ rg.color = "brown"
 methods.append(rg)
 
 alpha = .01
-rg = td.ResidualGradientDS(alpha=alpha, phi=phi, gamma=gamma)
-rg.name = r"RG DS $\alpha$={}".format(alpha)
-rg.color = "brown"
-methods.append(rg)
+rg_ds = td.ResidualGradientDS(alpha=alpha, phi=phi, gamma=gamma)
+rg_ds.name = r"RG DS $\alpha$={}".format(alpha)
+rg_ds.color = "brown"
+methods.append(rg_ds)
 
 lam = 0.
 lstd = td.RecursiveLSTDLambda(lam=lam, phi=phi, gamma=gamma)
@@ -101,38 +101,37 @@ lstd.color = "k"
 lam = 0.
 alpha = .1
 lspe = td.RecursiveLSPELambda(lam=lam, alpha=alpha, phi=phi)
-lstd.name = r"LSPE({}) $\alpha$={}".format(lam, alpha)
-methods.append(lstd)
+lspe.name = r"LSPE({}) $\alpha$={}".format(lam, alpha)
+methods.append(lspe)
 
 lam = 0.
 alpha = .1
-lspe = td.RecursiveLSPELambdaCO(lam=lam, alpha=alpha, phi=phi)
-lstd.name = r"LSPE({}) $\alpha$={}".format(lam, alpha)
-methods.append(lstd)
+lspe_co = td.RecursiveLSPELambdaCO(lam=lam, alpha=alpha, phi=phi)
+lspe_co.name = r"LSPE({}) $\alpha$={}".format(lam, alpha)
+methods.append(lspe_co)
 
 lam = 0.
 alpha = .1
 beta = 100.
-lstd = td.FPKF(lam=lam, alpha=alpha, beta=beta, phi=phi)
-lstd.name = r"FPKF({}) $\alpha={}$ $\beta={}$".format(lam, alpha, beta)
-methods.append(lstd)
-
+fpkf = td.FPKF(lam=lam, alpha=alpha, beta=beta, phi=phi)
+fpkf.name = r"FPKF({}) $\alpha={}$ $\beta={}$".format(lam, alpha, beta)
+methods.append(fpkf)
 
 brm = td.RecursiveBRM(phi=phi)
 brm.name = "BRM"
 brm.color = "b"
 methods.append(brm)
-brm = td.RecursiveBRMDS(phi=phi)
-brm.name = "BRMDS"
-brm.color = "b"
-methods.append(brm)
 
+brmds = td.RecursiveBRMDS(phi=phi)
+brmds.name = "BRMDS"
+brmds.color = "b"
+methods.append(brmds)
 
-lam = 0.
-lstd = td.RecursiveLSTDLambdaJP(lam=lam, phi=phi, gamma=gamma)
-lstd.name = r"LSTD-JP({})".format(0)
-lstd.color = "k"
-methods.append(lstd)
+lam = 0.0
+lstd_jp = td.RecursiveLSTDLambdaJP(lam=lam, phi=phi, gamma=gamma)
+lstd_jp.name = r"LSTD-JP({})".format(0)
+lstd_jp.color = "k"
+methods.append(lstd_jp)
 
 
 l = 1000

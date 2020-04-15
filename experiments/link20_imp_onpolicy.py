@@ -45,7 +45,7 @@ bbo = td.BBOV2(
     alpha,
     D_a=beh_policy.dim_A,
     phi=phi)
-bbo.name = r"BBO $\alpha$={}".format(alpha)
+bbo.name = r"BBO".format()
 bbo.color = "black"
 methods.append(bbo)
 
@@ -137,11 +137,10 @@ error_every = 300
 n_indep = 50
 n_eps = 1
 episodic = False
-verbose = 10
 criterion = "MSE"
 criteria = ["RMSPBE", "RMSBE", "RMSE", "MSPBE", "MSBE", "MSE"]
-name = "link20_imp_onpolicy"
 title = "11. 20-link Lin. Pole Balancing On-pol."
+name = "link20_imp_onpolicy"
 
 
 if __name__ == "__main__":

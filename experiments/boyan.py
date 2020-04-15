@@ -38,7 +38,7 @@ bbo = td.BBOV2(
     alpha,
     D_a=1,
     phi=phi)
-bbo.name = r"BBO $\alpha$={}".format(alpha)
+bbo.name = r"BBO".format()
 bbo.color = "black"
 methods.append(bbo)
 
@@ -51,10 +51,10 @@ methods.append(gtd)
 
 alpha = .5
 mu = 1.
-gtd = td.GTD2(alpha=alpha, beta=mu * alpha, phi=phi)
-gtd.name = r"GTD2 $\alpha$={} $\mu$={}".format(alpha, mu)
-gtd.color = "#6E086D"
-methods.append(gtd)
+gtd2 = td.GTD2(alpha=alpha, beta=mu * alpha, phi=phi)
+gtd2.name = r"GTD2 $\alpha$={} $\mu$={}".format(alpha, mu)
+gtd2.color = "#6E086D"
+methods.append(gtd2)
 
 alpha = 0.2
 lam = 1.
@@ -104,16 +104,16 @@ lam = .0
 alpha = .01
 beta = 1000
 mins = 0
-lstd = td.FPKF(lam=lam, alpha=alpha, beta=beta, mins=mins, phi=phi)
-lstd.name = r"FPKF({}) $\alpha={}$ $\beta={}$".format(lam, alpha, beta)
-lstd.ls = "--"
-methods.append(lstd)
+fpkf = td.FPKF(lam=lam, alpha=alpha, beta=beta, mins=mins, phi=phi)
+fpkf.name = r"FPKF({}) $\alpha={}$ $\beta={}$".format(lam, alpha, beta)
+fpkf.ls = "--"
+methods.append(fpkf)
 
-brm = td.RecursiveBRMDS(phi=phi)
-brm.name = "BRMDS"
-brm.color = "b"
-brm.ls = "--"
-methods.append(brm)
+brm_ds = td.RecursiveBRMDS(phi=phi)
+brm_ds.name = "BRMDS"
+brm_ds.color = "b"
+brm_ds.ls = "--"
+methods.append(brm_ds)
 
 brm = td.RecursiveBRM(phi=phi)
 brm.name = "BRM"
@@ -121,10 +121,10 @@ brm.color = "b"
 methods.append(brm)
 
 alpha = 0.5
-rg = td.ResidualGradientDS(alpha=alpha, phi=phi)
-rg.name = r"RG DS $\alpha$={}".format(alpha)
-rg.ls = "--"
-methods.append(rg)
+rg_ds = td.ResidualGradientDS(alpha=alpha, phi=phi)
+rg_ds.name = r"RG DS $\alpha$={}".format(alpha)
+rg_ds.ls = "--"
+methods.append(rg_ds)
 
 alpha = 0.5
 rg = td.ResidualGradient(alpha=alpha, phi=phi)
@@ -138,20 +138,21 @@ ktd = td.KTD(phi=phi, gamma=1., P_init=P_init, theta_noise=None, eta=eta,
              reward_noise=reward_noise)
 ktd.name = r"KTD $\eta$={}, $\sigma^2$={} $P_0$={}".format(
     eta, reward_noise, P_init)
-#methods.append(ktd)
+methods.append(ktd)
 
 sigma = 1.
 gptdp = td.GPTDP(phi=phi, sigma=sigma)
 gptdp.name = r"GPTDP $\sigma$={}".format(sigma)
 gptdp.ls = "--"
-#methods.append(gptdp)
+methods.append(gptdp)
 
 lam = .8
 sigma = 1e-5
 gptdp = td.GPTDPLambda(phi=phi, tau=sigma, lam=lam)
 gptdp.name = r"GPTDP({}) $\sigma$={}".format(lam, sigma)
 gptdp.ls = "--"
-#methods.append(gptdp)
+methods.append(gptdp)
+
 
 l = 20
 n_eps = 100

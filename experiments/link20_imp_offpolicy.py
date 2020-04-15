@@ -40,7 +40,7 @@ bbo = td.BBOV2(
     alpha,
     D_a=target_policy.dim_A,
     phi=phi)
-bbo.name = r"BBO $\alpha$={}".format(alpha)
+bbo.name = r"BBO".format()
 bbo.color = "black"
 methods.append(bbo)
 
