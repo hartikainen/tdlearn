@@ -90,10 +90,10 @@ methods.append(tdc)
 lam = 0.0
 alpha = 0.002
 mu = 0.0001
-tdc = td.GeriTDCLambda(alpha=alpha, mu = mu, lam=lam, phi=phi, gamma=gamma)
-tdc.name = r"TDC({}) $\alpha$={} $\mu$={}".format(lam, alpha, mu)
-tdc.color = "b"
-methods.append(tdc)
+geri_tdc = td.GeriTDCLambda(alpha=alpha, mu=mu, lam=lam, phi=phi, gamma=gamma)
+geri_tdc.name = r"GeriTDC({}) $\alpha$={} $\mu$={}".format(lam, alpha, mu)
+geri_tdc.color = "b"
+methods.append(geri_tdc)
 
 alpha = .001
 lam = 0.0
