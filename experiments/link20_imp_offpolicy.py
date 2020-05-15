@@ -17,7 +17,7 @@ from experiments import experiment_main
 gamma=0.95
 dt = 0.1
 dim = 20
-sigma = np.ones(2*dim)*0.01
+sigma = np.ones(2*dim)*1.0
 mdp = examples.NLinkPendulumMDP(np.ones(dim)*.5, np.ones(dim)*.6, sigma=sigma, dt=dt)
 phi = features.squared_diag(2*dim)
 
