@@ -22,25 +22,22 @@ task = LinearDiscreteValuePredictionTask(mdp, gamma, phi, p0)
 # import tensorflow as tf
 # tf.config.experimental_run_functions_eagerly(True)
 
-# define the methods to examine
-gtd2 = td.GTD2(alpha=0.5, beta=0.5, phi=phi)
-gtd2.name = "GTD2"
-gtd2.color = "#0F6E08"
-
-gtd = td.GTD(alpha=0.5, beta=0.5, phi=phi)
-gtd.name = "GTD"
-gtd.color = "#6E086D"
-
 methods = []
 
-alpha = 0.1
-bbo = td.BBOV2(
+alpha = 1.0
+bbo_v2 = td.BBOV2(
     alpha,
     D_a=1,
     phi=phi)
-bbo.name = r"BBO".format()
-bbo.color = "black"
-methods.append(bbo)
+bbo_v2.name = r"BBO-v2".format()
+bbo_v2.color = "black"
+methods.append(bbo_v2)
+
+alpha = 1.0
+bbo_v3 = td.BBOV3(
+    alpha,
+    D_a=1,
+    phi=phi)
 
 alpha = .5
 mu = 2.

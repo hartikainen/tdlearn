@@ -43,13 +43,22 @@ methods = []
 
 
 alpha = 1.0
-bbo = td.BBOV2(
+bbo_v2 = td.BBOV2(
     alpha,
     D_a=policy.dim_A,
     phi=phi)
-bbo.name = r"BBO".format()
-bbo.color = "black"
-methods.append(bbo)
+bbo_v2.name = r"BBO-v2".format()
+bbo_v2.color = "black"
+methods.append(bbo_v2)
+
+alpha = 1.0
+bbo_v3 = td.BBOV3(
+    alpha,
+    D_a=policy.dim_A,
+    phi=phi)
+bbo_v3.name = r"BBO-v3".format()
+bbo_v3.color = "black"
+methods.append(bbo_v3)
 
 
 alpha = 0.0005
