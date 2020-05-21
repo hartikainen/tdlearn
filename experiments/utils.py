@@ -14,3 +14,12 @@ def set_gpu_memory_growth(growth):
         except RuntimeError as e:
             # Memory growth must be set before GPUs have been initialized
             print(e)
+
+
+def split_gpus(num_logical_devices_per_gpu):
+    physical_devices = tf.config.list_physical_devices('GPU')
+    for physical_device in physical_devices:
+        tf.config.set_logical_device_configuration(
+            physical_device,
+            [tf.config.LogicalDeviceConfiguration(memory_limit=1000)
+             for _ in range(num_logical_devices_per_gpu)])

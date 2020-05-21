@@ -15,7 +15,7 @@ from matplotlib.colors import LogNorm
 import matplotlib.pyplot as plt
 import examples
 
-from .utils import set_gpu_memory_growth
+from .utils import set_gpu_memory_growth, split_gpus
 
 plt.ion()
 
@@ -269,7 +269,8 @@ def experiment_main(task, name, criterion, methods, *args, **kwargs):
     argument_parser = get_argument_parser()
     cli_args = argument_parser.parse_args()
 
-    set_gpu_memory_growth(True)
+    # split_gpus(10)
+    # set_gpu_memory_growth(True)
 
     if cli_args.mode == 'train':
         import joblib
