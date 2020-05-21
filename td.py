@@ -268,13 +268,22 @@ class BBO(LinearValueFunctionPredictor, OffPolicyValueFunctionPredictor):
         return self.theta
 
 
+EPSILON = 1.0
+
+
 class BBOV2(BBO):
-    def __init__(self, alpha, D_a, *args, **kwargs):
+    def __init__(self,
+                 alpha,
+                 D_a,
+                 *args,
+                 uncertainty_model_class=bbo.OnlineUncertaintyModelV2,
+                 **kwargs):
         """TODO(hartikainen)."""
         LinearValueFunctionPredictor.__init__(self, *args, **kwargs)
         OffPolicyValueFunctionPredictor.__init__(self, *args, **kwargs)
 
-        self.uncertainty_model = bbo.OnlineUncertaintyModelV2()
+        self.uncertainty_model_class = uncertainty_model_class
+        self.uncertainty_model = uncertainty_model_class(sigma_0=EPSILON)
 
         self.init_vals['alpha'] = alpha
         self.alpha = self._assert_iterator(self.init_vals['alpha'])
@@ -295,12 +304,16 @@ class BBOV2(BBO):
                 'config': {'D': tf.size(uncertainty_model.rho).numpy()},
                 'weights': uncertainty_model.get_weights()
             }
+            res['uncertainty_model_class'] = self.uncertainty_model_class
+
         return res
 
     def __setstate__(self, state):
+        uncertainty_model_class = state['uncertainty_model_class']
+
         if hasattr(state, 'uncertainty_model'):
             uncertainty_model_state = state.pop('uncertainty_model')
-            uncertainty_model = bbo.OnlineUncertaintyModelV2()
+            uncertainty_model = self.uncertainty_model_class(sigma_0=EPSILON)
             D = uncertainty_model_state['config']['D']
             import ipdb; ipdb.set_trace(context=30)
             uncertainty_model(np.zeros((1, D)))
@@ -308,8 +321,9 @@ class BBOV2(BBO):
 
             uncertainty_model.set_weights(weights)
         else:
-            uncertainty_model = bbo.OnlineUncertaintyModelV2()
+            uncertainty_model = uncertainty_model_class(sigma_0=EPSILON)
 
+        state['uncertainty_model_class'] = uncertainty_model_class
         state['uncertainty_model'] = uncertainty_model
         self.__dict__ = state.copy()
         self.alpha = self._assert_iterator(self.init_vals['alpha'])
@@ -339,6 +353,14 @@ class BBOV2(BBO):
         self._toc()
 
         return self.theta
+
+
+class BBOV3(BBOV2):
+    def __init__(self, *args, **kwargs):
+        return super(BBOV3, self).__init__(
+            *args,
+            uncertainty_model_class=bbo.OnlineUncertaintyModelV3,
+            **kwargs)
 
 
 class GTDBase(LinearValueFunctionPredictor, OffPolicyValueFunctionPredictor):
