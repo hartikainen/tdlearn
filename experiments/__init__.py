@@ -272,15 +272,19 @@ def experiment_main(task, name, criterion, methods, *args, **kwargs):
     set_gpu_memory_growth(True)
 
     if cli_args.mode == 'train':
-        mean, std, raw = run_experiment(
-            *args,
-            task=task,
-            name=name,
-            criterion=criterion,
-            methods=methods,
-            n_jobs=cli_args.n_jobs,
-            verbose=cli_args.verbose,
-            **kwargs)
+        import joblib
+        from ray.util.joblib import register_ray
+        register_ray()
+        with joblib.parallel_backend('ray'):
+            mean, std, raw = run_experiment(
+                *args,
+                task=task,
+                name=name,
+                criterion=criterion,
+                methods=methods,
+                n_jobs=cli_args.n_jobs,
+                verbose=cli_args.verbose,
+                **kwargs)
 
         save_results(
             *args,
