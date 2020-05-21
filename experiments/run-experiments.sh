@@ -2,7 +2,7 @@
 
 
 EXPERIMENT_NAMES=(
-    "baird"
+    # "baird"
     "boyan"
     # "budget_disc"
     # "corrupted_chain"
@@ -17,14 +17,14 @@ EXPERIMENT_NAMES=(
 
     "lqr_full_offpolicy"
     "lqr_full_onpolicy"
-    "lqr_gauss_onpolicy"
+    # "lqr_gauss_onpolicy"
 
     "lqr_imp_offpolicy"
     "lqr_imp_onpolicy"
-    "lqr_imp_onpolicy_unnorm"
+    # "lqr_imp_onpolicy_unnorm"
 
-    "swingup_gauss_offpolicy"
-    "swingup_gauss_onpolicy"
+    # "swingup_gauss_offpolicy"
+    # "swingup_gauss_onpolicy"
     # "swingup_regtd"
 )
 
