@@ -273,6 +273,9 @@ class OnlineUncertaintyModelV3(tf.keras.Model):
 
         self.N.assign_add(N)
 
+        tf.debugging.check_numerics(self.C_inverse, "C_inverse")
+        tf.debugging.check_numerics(self.rho, "rho")
+
         return True
 
     def get_diagnostics(self):

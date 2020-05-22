@@ -350,6 +350,8 @@ class BBOV2(BBO):
         self.theta[:] = - 1.0 * tf.squeeze(
             tf.matmul(C_inverse, rho, transpose_b=True))
 
+        tf.debugging.check_numerics(self.theta, "theta")
+
         self._toc()
 
         return self.theta
