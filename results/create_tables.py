@@ -8,7 +8,7 @@ from experiments import load_results
 
 tasks = (
   'boyan',
-  'baird',
+  # 'baird',
   'disc_random_on',
   'disc_random_off',
   'lqr_imp_onpolicy',
@@ -23,20 +23,41 @@ tasks = (
 )
 
 
+# TASK_TO_INDEX_MAP = {
+#     'boyan': '1. 14-State Boyan Chain',
+#     'baird': '2. Baird Star Example',
+#     'disc_random_on': '3. 400-State Random MDP On-policy',
+#     'disc_random_off': '4. 400-State Random MDP Off-policy',
+#     'lqr_imp_onpolicy': '5. Lin. Cart-Pole Balancing On-pol. Imp. Feat.',
+#     'lqr_imp_offpolicy': '6. Lin. Cart-Pole Balancing Off-pol. Imp. Feat.',
+#     'lqr_full_onpolicy': '7. Lin. Cart-Pole Balancing On-pol. Perf. Feat.',
+#     'lqr_full_offpolicy': '8. Lin. Cart-Pole Balancing Off-pol. Perf. Feat.',
+#     # '': '9. Cart-Pole Swingup On-policy',
+#     # '': '10. Cart-Pole Swingup Off-policy',
+#     'link20_imp_onpolicy': '11. 20-link Lin. Pole Balancing On-pol.',
+#     'link20_imp_offpolicy': '12. 20-link Lin. Pole Balancing Off-pol.',
+# }
+
+
 TASK_TO_INDEX_MAP = {
-    'boyan': '1. 14-State Boyan Chain',
-    'baird': '2. Baird Star Example',
-    'disc_random_on': '3. 400-State Random MDP On-policy',
-    'disc_random_off': '4. 400-State Random MDP Off-policy',
-    'lqr_imp_onpolicy': '5. Lin. Cart-Pole Balancing On-pol. Imp. Feat.',
-    'lqr_imp_offpolicy': '6. Lin. Cart-Pole Balancing Off-pol. Imp. Feat.',
-    'lqr_full_onpolicy': '7. Lin. Cart-Pole Balancing On-pol. Perf. Feat.',
-    'lqr_full_offpolicy': '8. Lin. Cart-Pole Balancing Off-pol. Perf. Feat.',
+    'boyan': '14-State Boyan Chain',
+    'baird': 'Baird Star Example',
+    'disc_random_on': '400-State Random MDP (On-pol.)',
+    'disc_random_off': '400-State Random MDP (Off-pol.)',
+    'lqr_imp_onpolicy': 'Cart-Pole (On-pol., Imp. Feat.)',
+    'lqr_imp_offpolicy': 'Cart-Pole (Off-pol., Imp. Feat.)',
+    'lqr_full_onpolicy': 'Cart-Pole (On-pol., Perf. Feat.)',
+    'lqr_full_offpolicy': 'Cart-Pole (Off-pol., Perf. Feat.)',
     # '': '9. Cart-Pole Swingup On-policy',
     # '': '10. Cart-Pole Swingup Off-policy',
-    'link20_imp_onpolicy': '11. 20-link Lin. Pole Balancing On-pol.',
-    'link20_imp_offpolicy': '12. 20-link Lin. Pole Balancing Off-pol.',
+    'link20_imp_onpolicy': '20-Link Pole (On-pol.)',
+    'link20_imp_offpolicy': '20-Link Pole (Off-pol.)',
 }
+
+# TASK_TO_INDEX_MAP = {
+#     key: " ".join(value.split(" ")[1:])
+#     for key, value in TASK_TO_INDEX_MAP.items()
+# }
 
 
 METHODS_TO_REPORT = (
@@ -317,12 +338,12 @@ print(sum_rmse_dataframe)
 WARN_BAIRD = "\kh{Probably want to drop the Baird experiment since its solution is the same as the prior for many of the methods.} "
 
 FINAL_RMSE_CAPTION = (
-    f"{WARN_BAIRD} MSE of final predictions. The values for all methods"
+    f"MSE of final predictions. The values for all methods"
     " except for BBO are obtained with code provided by~\cite{dann2014policy}."
 )
 
 SUM_RMSE_CAPTION = (
-    f"{WARN_BAIRD} Sum of square root MSE over all timesteps. The values for all methods"
+    f"Sum of square root MSE over all timesteps. The values for all methods"
     " except for BBO are obtained with code provided by~\cite{dann2014policy}."
 )
 
