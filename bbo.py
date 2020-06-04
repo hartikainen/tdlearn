@@ -246,12 +246,15 @@ class OnlineUncertaintyModelV3(tf.keras.Model):
             return C_inverse
 
         C_inverse = update_C_inverse()
-        self.C_inverse.assign(C_inverse)
+        C_inverse_assign = self.C_inverse.assign(C_inverse)
 
         def update_C_inverse_2():
+            # tf.print("self.N: ", self.N)
             C_inverse_nth_col = self.C_inverse[:, self.N]
             C_inverse_nth_row = self.C_inverse[self.N, :]
 
+            # C_inverse_nth_column_row_outer_product = tf.einsum(
+            #     'i,j->ij', C_inverse_nth_row, C_inverse_nth_col)
             C_inverse_nth_column_row_outer_product = tf.einsum(
                 'i,j->ij', C_inverse_nth_col, C_inverse_nth_row)
             C_inverse_nth_diagonal = self.C_inverse[self.N, self.N]
@@ -265,13 +268,16 @@ class OnlineUncertaintyModelV3(tf.keras.Model):
         rho_delta = b_N * reward
         self.rho.assign_add(rho_delta)
 
-        C_inverse = tf.cond(
-            tf.less(self.N, tf.shape(self.C_inverse)[0]),
-            update_C_inverse_2,
-            lambda: C_inverse)
-        self.C_inverse.assign(C_inverse)
+        with tf.control_dependencies([C_inverse_assign]):
+            C_inverse = tf.cond(
+                tf.less(self.N, tf.shape(self.C_inverse)[0]),
+                update_C_inverse_2,
+                lambda: self.C_inverse)
 
-        self.N.assign_add(N)
+            C_inverse_assign = self.C_inverse.assign(C_inverse)
+
+            with tf.control_dependencies([C_inverse_assign]):
+                self.N.assign_add(N)
 
         tf.debugging.check_numerics(self.C_inverse, "C_inverse")
         tf.debugging.check_numerics(self.rho, "rho")
