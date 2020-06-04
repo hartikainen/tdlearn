@@ -268,22 +268,22 @@ class BBO(LinearValueFunctionPredictor, OffPolicyValueFunctionPredictor):
         return self.theta
 
 
-EPSILON = 1.0
-
-
 class BBOV2(BBO):
     def __init__(self,
                  alpha,
                  D_a,
                  *args,
                  uncertainty_model_class=bbo.OnlineUncertaintyModelV2,
+                 prior_epsilon=1.0,
                  **kwargs):
         """TODO(hartikainen)."""
         LinearValueFunctionPredictor.__init__(self, *args, **kwargs)
         OffPolicyValueFunctionPredictor.__init__(self, *args, **kwargs)
 
+        self._prior_epsilon = prior_epsilon
         self.uncertainty_model_class = uncertainty_model_class
-        self.uncertainty_model = uncertainty_model_class(sigma_0=EPSILON)
+        self.uncertainty_model = uncertainty_model_class(
+            sigma_0=self._prior_epsilon)
 
         self.init_vals['alpha'] = alpha
         self.alpha = self._assert_iterator(self.init_vals['alpha'])
@@ -305,15 +305,15 @@ class BBOV2(BBO):
                 'weights': uncertainty_model.get_weights()
             }
             res['uncertainty_model_class'] = self.uncertainty_model_class
+            res['_prior_epsilon'] = self._prior_epsilon
 
         return res
 
     def __setstate__(self, state):
-        uncertainty_model_class = state['uncertainty_model_class']
-
         if hasattr(state, 'uncertainty_model'):
             uncertainty_model_state = state.pop('uncertainty_model')
-            uncertainty_model = self.uncertainty_model_class(sigma_0=EPSILON)
+            uncertainty_model = state['uncertainty_model_class'](
+                sigma_0=state['_prior_epsilon'])
             D = uncertainty_model_state['config']['D']
             import ipdb; ipdb.set_trace(context=30)
             uncertainty_model(np.zeros((1, D)))
@@ -321,9 +321,9 @@ class BBOV2(BBO):
 
             uncertainty_model.set_weights(weights)
         else:
-            uncertainty_model = uncertainty_model_class(sigma_0=EPSILON)
+            uncertainty_model = state['uncertainty_model_class'](
+                sigma_0=state['_prior_epsilon'])
 
-        state['uncertainty_model_class'] = uncertainty_model_class
         state['uncertainty_model'] = uncertainty_model
         self.__dict__ = state.copy()
         self.alpha = self._assert_iterator(self.init_vals['alpha'])
