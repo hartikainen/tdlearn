@@ -310,6 +310,8 @@ class BBOV2(BBO):
         return res
 
     def __setstate__(self, state):
+        uncertainty_model_class = state.get('uncertainty_model_class')
+
         if hasattr(state, 'uncertainty_model'):
             uncertainty_model_state = state.pop('uncertainty_model')
             uncertainty_model = state['uncertainty_model_class'](
@@ -320,6 +322,8 @@ class BBOV2(BBO):
             weights = uncertainty_model_state['weights']
 
             uncertainty_model.set_weights(weights)
+        elif uncertainty_model_class is None:
+            uncertainty_model = None
         else:
             uncertainty_model = state['uncertainty_model_class'](
                 sigma_0=state['_prior_epsilon'])
