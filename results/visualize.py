@@ -36,10 +36,10 @@ def plot_task(task_dataframe, metric_to_use, axis, labels, legend=False):
     assert set(labels) == set(task_dataframe['method'].unique())
 
     X_UNITS = 'thousands'
-    # if X_UNITS == 'thousands':
-    #     task_dataframe['training_steps'] /= 1000
-    # else:
-    #     raise ValueError
+    if X_UNITS == 'thousands':
+        task_dataframe['training_steps'] /= 1000
+    else:
+        raise ValueError
 
     # breakpoint()
 
@@ -77,10 +77,10 @@ def plot_task(task_dataframe, metric_to_use, axis, labels, legend=False):
     # axis.set_yscale('symlog')
     axis.set_ylim(np.clip(axis.get_ylim(), 0.0, float('inf')))
 
-    # if X_UNITS == 'thousands':
-    #     axis.set_xlabel('Training Steps [$10^3$]')
-    # else:
-    #     axis.set_xlabel('Training Steps')
+    if X_UNITS == 'thousands':
+        axis.set_xlabel('Training Steps [$10^3$]')
+    else:
+        axis.set_xlabel('Training Steps')
 
 
 def plot(dataframes_by_task):
@@ -97,16 +97,25 @@ def plot(dataframes_by_task):
 
     num_subplots = len(task_ids)
     default_figsize = np.array(plt.rcParams.get('figure.figsize'))
-    figure_scale = 0.55
+    figure_scale = 0.5
 
-    num_subplots_per_side = int(np.ceil(np.sqrt(num_subplots)))
+    # num_subplots_per_side = int(np.ceil(np.sqrt(num_subplots)))
+    # subplots_shape = (num_subplots_per_side, num_subplots_per_side)
 
-    figsize = np.array((
-        num_subplots_per_side, 0.75 * num_subplots_per_side
-    )) * np.max(default_figsize * figure_scale)
-    figure, axes = plt.subplots(
-        num_subplots_per_side, num_subplots_per_side, figsize=figsize)
-    axes = np.atleast_1d(axes)
+    subplots_shape = (1, num_subplots)
+
+    # figure_scale = 0.5
+    # figsize = np.array((num_subplots, 0.5)) * np.max(default_figsize[0] * figure_scale)
+
+    figsize = (
+        np.array((1, 0.4))
+        # np.array((0.75, 0.55))
+        * np.array(subplots_shape[::-1])
+        # * np.array((3, 0.4))
+        * np.max(default_figsize[0] * figure_scale))
+
+    figure, axes = plt.subplots(*subplots_shape, figsize=figsize)
+    axes = np.atleast_2d(axes)
 
     save_dir = Path('/tmp/bbo/').expanduser()
     os.makedirs(save_dir, exist_ok=True)
@@ -137,14 +146,14 @@ def plot(dataframes_by_task):
 
         axis.get_legend().remove()
 
-        title = axis.set_title(TASK_TO_INDEX_MAP[task_id], fontsize='medium')
+        title = axis.set_title(TASK_TO_INDEX_MAP[task_id].split(' (')[0], fontsize='medium')
         titles.append(title)
 
         if i == axes.shape[0] - 1:
             axis.set_xlabel(
-                'Training Steps',
+                'Training Steps [$10^3$]',
                 labelpad=10,
-                fontsize='large',
+                # fontsize='large',
                 # fontweight='bold',
             )
         else:
@@ -155,7 +164,7 @@ def plot(dataframes_by_task):
                 axis.set_ylabel(
                     '$\sqrt{MSE}$',
                     labelpad=10,
-                    fontsize='large',
+                    # fontsize='large',
                     # fontweight='bold',
                 )
             elif metric_to_use == 'MSE':
@@ -165,33 +174,56 @@ def plot(dataframes_by_task):
         else:
             axis.set(ylabel=None)
 
-    handles, labels = axes[-1][-1].get_legend_handles_labels()
+    for tick in axes.flatten()[-1].get_yticklabels():
+        tick.set_rotation(70)
+
+    handles, labels = axes.flatten()[0].get_legend_handles_labels()
     legend = figure.legend(
         handles=(handles[-1], *handles[1:-1]),
         labels=(labels[-1], *labels[1:-1]),
-        ncol=num_subplots,
+        ncol=6,
+        handlelength=1.25,
+        handletextpad=0.25,
+        # labelspacing=0,
+        columnspacing=1.25,
+        # loc='best',
+
         loc='lower center',
-        bbox_to_anchor=(0.5, 1.0),
-        fontsize='large')
+        bbox_to_anchor=(0.5, 1.05),
+        bbox_transform=figure.transFigure,
+
+        # loc='lower center',
+        # bbox_to_anchor=(0.5, 1.0),
+        # fontsize='large'
+        fontsize='medium'
+    )
 
     legend.set_in_layout(True)
 
-    plt.tight_layout()
+    # plt.tight_layout()
     plt.savefig(
         # os.path.join(result._experiment_dir, 'result.pdf'),
         save_dir / 'result.pdf',
         # bbox_extra_artists=(legend_1, legend_2),
         # bbox_extra_artists=(legend_2, ),
+
         bbox_extra_artists=(*titles, legend),
-        bbox_inches='tight')
+        # bbox_extra_artists=(*titles, ),
+
+        bbox_inches='tight'
+    )
 
     plt.savefig(
         save_dir / 'result.png',
         # os.path.join(result._experiment_dir, 'result.png'),
         # bbox_extra_artists=(legend_1, legend_2),
         # bbox_extra_artists=(legend_2, ),
+
         bbox_extra_artists=(*titles, legend),
-        bbox_inches='tight')
+        # bbox_extra_artists=(*titles, ),
+
+        bbox_inches='tight'
+    )
 
 
 def main():
