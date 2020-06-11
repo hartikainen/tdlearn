@@ -343,7 +343,7 @@ class BBOV2(BBO):
         b_N_next = np.concatenate((f1, ))[None, ...].astype(np.float32)
 
         self.uncertainty_model.online_update(
-            b_N, b_hat, b_N_next, self.gamma, tf.constant(r, dtype=b_N.dtype))
+            b_N, b_hat, b_N_next, self.gamma, tf.constant(r, dtype=b_N.dtype), iw=tf.constant(rho, dtype=b_N.dtype))
 
         C_inverse = self.uncertainty_model.C_inverse
         rho = self.uncertainty_model.rho

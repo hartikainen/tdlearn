@@ -126,7 +126,9 @@ class OnlineUncertaintyModelV2(tf.keras.Model):
     def build(self, input_shapes):
         D = sum(input_shape[-1] for input_shape in tree.flatten(input_shapes))
         self.C_inverse = self.add_weight(
-            'C_inverse', shape=(D, D), initializer=tf.initializers.identity)
+            'C_inverse',
+            shape=(D, D),
+            initializer=tf.initializers.identity(gain=-1.0 * self.sigma_0))
         self.rho = self.add_weight(
             'rho', shape=(1, D), initializer=tf.initializers.zeros)
         self.Delta_N = self.add_weight(
@@ -145,31 +147,11 @@ class OnlineUncertaintyModelV2(tf.keras.Model):
         return 0.0
 
     @tf.function(experimental_relax_shapes=True)
-    def online_update(self, b_N, b_hat, b_N_next, gamma, reward):
+    def online_update(self, b_N, b_hat, b_N_next, gamma, reward, iw=1.0):
         N = tf.shape(b_N)[0]
         tf.debugging.assert_equal(N, 1)
 
-        variance = self.sigma_0
-
-        Delta = gamma * b_N_next - b_N
-
-        def initialize_C_inverse():
-            C = (
-                tf.cast(
-                    tf.matmul(b_N, gamma * b_N_next - b_N, transpose_a=True),
-                    tf.float64)
-                - variance * tf.eye(
-                    tf.shape(self.C_inverse)[-1], dtype=tf.float64))
-
-            # TODO(hartikainen): For some reason cholesky fails here.
-            # cholesky = tf.linalg.cholesky(tf.cast(C, tf.float64))
-            # C_inverse = tf.linalg.cholesky_solve(
-            #     cholesky,
-            #     tf.eye(tf.shape(self.C_inverse)[-1], dtype=tf.float64))
-
-            C_inverse = tf.linalg.inv(C)
-
-            return tf.cast(C_inverse, tf.float32)
+        Delta = iw * (gamma * b_N_next - b_N)
 
         def update_C_inverse():
             Delta_C_inverse = tf.matmul(Delta, self.C_inverse)
@@ -181,14 +163,10 @@ class OnlineUncertaintyModelV2(tf.keras.Model):
             C_inverse = self.C_inverse + C_inverse_delta
             return C_inverse
 
-        C_inverse = tf.cond(
-            tf.equal(self.N, 0),
-            initialize_C_inverse,
-            update_C_inverse)
-
+        C_inverse = update_C_inverse()
         self.C_inverse.assign(C_inverse)
 
-        rho_delta = b_N * reward
+        rho_delta = iw * b_N * reward
         self.rho.assign_add(rho_delta)
 
         self.N.assign_add(N)
