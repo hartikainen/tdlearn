@@ -137,7 +137,7 @@ class OnlineUncertaintyModelV2(tf.keras.Model):
             'N', shape=(), dtype=tf.int32, initializer=tf.initializers.zeros)
 
     def reset(self):
-        self.C_inverse.assign(tf.eye(*self.C_inverse.shape))
+        self.C_inverse.assign(-1.0 * self.sigma_0 * tf.eye(*self.C_inverse.shape))
         self.rho.assign(tf.zeros_like(self.rho))
         self.Delta_N.assign(tf.zeros_like(self.Delta_N))
         self.N.assign(tf.zeros_like(self.N))
