@@ -103,6 +103,13 @@ lstd.name = r"LSTD({}) $\epsilon$={}".format(lam, eps)
 lstd.color = "g"
 lstd.ls = "-."
 methods.append(lstd)
+
+lam = 0.0
+eps = np.nan
+lstd = td.LSTDLambda(lam=lam, eps=eps, phi=phi, gamma=gamma)
+lstd.name = r"LSTD({}) $\epsilon$={}".format(lam, eps)
+methods.append(lstd)
+
 #
 alpha = .3
 beta = 100.

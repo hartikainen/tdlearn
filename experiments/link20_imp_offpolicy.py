@@ -126,6 +126,13 @@ lstd_jp.name = r"LSTD({})-CO $\epsilon$={}".format(lam, eps)
 lstd_jp.color = "g"
 lstd_jp.ls = "-."
 methods.append(lstd_jp)
+
+lam = 0.0
+eps = np.nan
+lstd = td.LSTDLambda(lam=lam, eps=eps, phi=phi, gamma=gamma)
+lstd.name = r"LSTD({}) $\epsilon$={}".format(lam, eps)
+methods.append(lstd)
+
 #
 alpha = 0.3
 beta=10.

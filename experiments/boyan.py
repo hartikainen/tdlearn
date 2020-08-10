@@ -85,6 +85,12 @@ lstd = td.RecursiveLSTDLambda(lam=lam, eps=eps, phi=phi)
 lstd.name = r"LSTD({})".format(lam)
 methods.append(lstd)
 
+lam = .8
+eps = np.nan
+lstd = td.LSTDLambda(lam=lam, eps=eps, phi=phi)
+lstd.name = r"LSTD({}) $\epsilon$={}".format(lam, eps)
+methods.append(lstd)
+
 lam = .0
 eps = 100
 lstd = td.RecursiveLSTDLambda(lam=lam, eps=eps, phi=phi)

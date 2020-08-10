@@ -125,6 +125,13 @@ lstd.color = "g"
 lstd.ls = "-."
 methods.append(lstd)
 
+lam = 0.0
+eps = np.nan
+lstd = td.LSTDLambda(lam=lam, eps=eps, phi=phi, gamma=gamma)
+lstd.name = r"LSTD({}) $\epsilon$={}".format(lam, eps)
+methods.append(lstd)
+
+
 lam = 0.
 eps = 0.01
 lstd = td.RecursiveLSTDLambda(lam=lam, eps=eps, phi=phi, gamma=gamma)
