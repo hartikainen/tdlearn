@@ -61,12 +61,12 @@ bbo_v3.color = "black"
 methods.append(bbo_v3)
 
 
-alpha = 0.0005
-mu = .001
-gtd = td.GTD(alpha=alpha, beta=mu * alpha, phi=phi)
-gtd.name = r"GTD $\alpha$={} $\mu$={}".format(alpha, mu)
-gtd.color = "r"
-methods.append(gtd)
+# alpha = 0.0005
+# mu = .001
+# gtd = td.GTD(alpha=alpha, beta=mu * alpha, phi=phi)
+# gtd.name = r"GTD $\alpha$={} $\mu$={}".format(alpha, mu)
+# gtd.color = "r"
+# methods.append(gtd)
 
 alpha, mu = 0.005, 0.5
 gtd = td.GTD2(alpha=alpha, beta=mu * alpha, phi=phi)
@@ -74,12 +74,12 @@ gtd.name = r"GTD2 $\alpha$={} $\mu$={}".format(alpha, mu)
 gtd.color = "orange"
 methods.append(gtd)
 
-alpha = td.RMalpha(0.01, 0.05)
-lam = .0
-td0 = td.LinearTDLambda(alpha=alpha, lam=lam, phi=phi, gamma=gamma)
-td0.name = r"TD({}) $\alpha$={}".format(lam, alpha)
-td0.color = "k"
-methods.append(td0)
+# alpha = td.RMalpha(0.01, 0.05)
+# lam = .0
+# td0 = td.LinearTDLambda(alpha=alpha, lam=lam, phi=phi, gamma=gamma)
+# td0.name = r"TD({}) $\alpha$={}".format(lam, alpha)
+# td0.color = "k"
+# methods.append(td0)
 
 alpha = .008
 lam = .2
@@ -96,12 +96,12 @@ tdc.name = r"TDC({}) $\alpha$={} $\mu$={}".format(lam, alpha, mu)
 tdc.color = "b"
 methods.append(tdc)
 
-alpha = .1
-lam = 0.0
-lstd = td.RecursiveLSPELambda(lam=lam, alpha=alpha, phi=phi, gamma=gamma)
-lstd.name = r"LSPE({}) $\alpha$={}".format(lam, alpha)
-lstd.color = "g"
-methods.append(lstd)
+# alpha = .1
+# lam = 0.0
+# lstd = td.RecursiveLSPELambda(lam=lam, alpha=alpha, phi=phi, gamma=gamma)
+# lstd.name = r"LSPE({}) $\alpha$={}".format(lam, alpha)
+# lstd.color = "g"
+# methods.append(lstd)
 
 lam = 0.0
 eps = 10
@@ -117,58 +117,58 @@ lstd = td.LSTDLambda(lam=lam, eps=eps, phi=phi, gamma=gamma)
 lstd.name = r"LSTD({}) $\epsilon$={}".format(lam, eps)
 methods.append(lstd)
 
-#
-alpha = 0.5
-beta=10.
-mins=500
-lam =.8
-lstd = td.FPKF(lam=lam, alpha = alpha, beta=beta, mins=mins, phi=phi, gamma=gamma)
-lstd.name = r"FPKF({}) $\alpha$={}".format(lam, alpha)
-lstd.color = "g"
-lstd.ls = "-."
-methods.append(lstd)
+# #
+# alpha = 0.5
+# beta=10.
+# mins=500
+# lam =.8
+# lstd = td.FPKF(lam=lam, alpha = alpha, beta=beta, mins=mins, phi=phi, gamma=gamma)
+# lstd.name = r"FPKF({}) $\alpha$={}".format(lam, alpha)
+# lstd.color = "g"
+# lstd.ls = "-."
+# methods.append(lstd)
 
-alpha = .02
-rg = td.ResidualGradientDS(alpha=alpha, phi=phi, gamma=gamma)
-rg.name = r"RG DS $\alpha$={}".format(alpha)
-rg.color = "brown"
-rg.ls = "--"
-methods.append(rg)
+# alpha = .02
+# rg = td.ResidualGradientDS(alpha=alpha, phi=phi, gamma=gamma)
+# rg.name = r"RG DS $\alpha$={}".format(alpha)
+# rg.color = "brown"
+# rg.ls = "--"
+# methods.append(rg)
 
-alpha = .01
-rg = td.ResidualGradient(alpha=alpha, phi=phi, gamma=gamma)
-rg.name = r"RG $\alpha$={}".format(alpha)
-rg.color = "brown"
-methods.append(rg)
+# alpha = .01
+# rg = td.ResidualGradient(alpha=alpha, phi=phi, gamma=gamma)
+# rg.name = r"RG $\alpha$={}".format(alpha)
+# rg.color = "brown"
+# methods.append(rg)
 
-reward_noise = 1e-1
-ktd = td.KTD(phi=phi, gamma=gamma, theta_noise=None, eta=1e-5, P_init=1.,
-             reward_noise=reward_noise)
-ktd.name = r"KTD $r_n={}$".format(reward_noise)
-#methods.append(ktd)
+# reward_noise = 1e-1
+# ktd = td.KTD(phi=phi, gamma=gamma, theta_noise=None, eta=1e-5, P_init=1.,
+#              reward_noise=reward_noise)
+# ktd.name = r"KTD $r_n={}$".format(reward_noise)
+# #methods.append(ktd)
 
-brm = td.BRMDS(phi=phi, eps=10)
-brm.name = "BRMDS"
-brm.color = "b"
-brm.ls = "--"
-methods.append(brm)
+# brm = td.BRMDS(phi=phi, eps=10)
+# brm.name = "BRMDS"
+# brm.color = "b"
+# brm.ls = "--"
+# methods.append(brm)
 
 brm = td.BRM(phi=phi, eps=10)
 brm.name = "BRM"
 brm.color = "b"
 methods.append(brm)
 
-sigma = 0.31
-gptdp = td.GPTDP(phi=phi, sigma=sigma)
-gptdp.name = r"GPTDP $\sigma$={}".format(sigma)
-#methods.append(gptdp)
+# sigma = 0.31
+# gptdp = td.GPTDP(phi=phi, sigma=sigma)
+# gptdp.name = r"GPTDP $\sigma$={}".format(sigma)
+# methods.append(gptdp)
 
-lam = .2 #suboptimal!!
-sigma = .031
-gptdp = td.GPTDPLambda(phi=phi, tau=sigma, lam=lam)
-gptdp.name = r"GPTDP({}) $\sigma$={}".format(lam,sigma)
-gptdp.ls="--"
-#methods.append(gptdp)
+# lam = .2 #suboptimal!!
+# sigma = .031
+# gptdp = td.GPTDPLambda(phi=phi, tau=sigma, lam=lam)
+# gptdp.name = r"GPTDP({}) $\sigma$={}".format(lam,sigma)
+# gptdp.ls="--"
+# methods.append(gptdp)
 
 
 l = 15000
