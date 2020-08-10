@@ -207,11 +207,11 @@ class OnlineUncertaintyModelV3(tf.keras.Model):
         return 0.0
 
     @tf.function(experimental_relax_shapes=True)
-    def online_update(self, b_N, b_hat, b_N_next, gamma, reward):
+    def online_update(self, b_N, b_hat, b_N_next, gamma, reward, iw=1.0):
         N = tf.shape(b_N)[0]
         tf.debugging.assert_equal(N, 1)
 
-        Delta = gamma * b_N_next - b_N
+        Delta = iw * (gamma * b_N_next - b_N)
 
         def update_C_inverse():
             Delta_C_inverse = tf.matmul(Delta, self.C_inverse)
@@ -243,7 +243,7 @@ class OnlineUncertaintyModelV3(tf.keras.Model):
             C_inverse = self.C_inverse + C_inverse_delta
             return C_inverse
 
-        rho_delta = b_N * reward
+        rho_delta = iw * b_N * reward
         self.rho.assign_add(rho_delta)
 
         with tf.control_dependencies([C_inverse_assign]):
