@@ -43,6 +43,7 @@ alpha = 1.0
 bbo_v2 = td.BBOV2(
     alpha,
     D_a=beh_policy.dim_A,
+    prior_epsilon=10.0,
     phi=phi)
 bbo_v2.name = r"BBO-v2".format()
 bbo_v2.color = "black"
@@ -52,6 +53,7 @@ alpha = 1.0
 bbo_v3 = td.BBOV3(
     alpha,
     D_a=beh_policy.dim_A,
+    prior_epsilon=10.0,
     phi=phi)
 bbo_v3.name = r"BBO-v3".format()
 bbo_v3.color = "black"

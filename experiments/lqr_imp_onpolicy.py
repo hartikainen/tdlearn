@@ -38,6 +38,7 @@ methods = []
 alpha = 1.0
 bbo_v2 = td.BBOV2(
     alpha,
+    prior_epsilon=1e-2,
     D_a=policy.dim_A,
     phi=phi)
 bbo_v2.name = r"BBO-v2".format()
@@ -47,6 +48,7 @@ methods.append(bbo_v2)
 alpha = 1.0
 bbo_v3 = td.BBOV3(
     alpha,
+    prior_epsilon=1e-2,
     D_a=policy.dim_A,
     phi=phi)
 bbo_v3.name = r"BBO-v3".format()
