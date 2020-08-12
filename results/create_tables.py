@@ -6,6 +6,7 @@ import tree
 from experiments import load_results
 
 
+# lqr_full_offpolicy + link20_imp_offpolicy for small figure
 tasks = (
   'boyan',
   # 'baird',
@@ -40,18 +41,18 @@ tasks = (
 
 
 TASK_TO_INDEX_MAP = {
-    'boyan': '14-State Boyan Chain',
+    'boyan': '14-State Boyan Chain ($\\oplus$)',
     'baird': 'Baird Star Example',
-    'disc_random_on': '400-State Random MDP (On-pol.)',
-    'disc_random_off': '400-State Random MDP (Off-pol.)',
-    'lqr_imp_onpolicy': 'Cart-Pole (On-pol., Imp. Feat.)',
-    'lqr_imp_offpolicy': 'Cart-Pole (Off-pol., Imp. Feat.)',
-    'lqr_full_onpolicy': 'Cart-Pole (On-pol., Perf. Feat.)',
-    'lqr_full_offpolicy': 'Cart-Pole (Off-pol., Perf. Feat.)',
+    'disc_random_on': '400-State Random MDP ($\\oplus$)',
+    'disc_random_off': '400-State Random MDP ($\\ominus$)',
+    'lqr_imp_onpolicy': 'Cart-Pole ($\\oplus$,$\\ddag$)',
+    'lqr_imp_offpolicy': 'Cart-Pole ($\\ominus$,$\\ddag$)',
+    'lqr_full_onpolicy': 'Cart-Pole ($\\oplus$, $\\dag$)',
+    'lqr_full_offpolicy': 'Cart-Pole ($\\ominus$, $\\dag$)',
     # '': '9. Cart-Pole Swingup On-policy',
     # '': '10. Cart-Pole Swingup Off-policy',
-    'link20_imp_onpolicy': '20-Link Pole (On-pol.)',
-    'link20_imp_offpolicy': '20-Link Pole (Off-pol.)',
+    'link20_imp_onpolicy': '20-Link Pole ($\\oplus$)',
+    'link20_imp_offpolicy': '20-Link Pole ($\\ominus$)',
 }
 
 # TASK_TO_INDEX_MAP = {
@@ -61,21 +62,19 @@ TASK_TO_INDEX_MAP = {
 
 
 METHODS_TO_REPORT = (
+    'BBO',
+    'BRM',
+    'LSTD+',
     'TD',
     'GTD2',
-    'TDC',
-
-    'BRM',
     'LSTD',
-    # 'LSPE'?
-
-    # SOME PROBABILISTIC METHOD?
+    'TDC',
 )
 
 
 TASK_METHOD_TO_LABEL_MAP = {
     'baird': {
-        'BBO': 'BBO',
+        'BBO-v2': 'BBO',
         'BRM': 'BRM',
         # 'BRMDS': 0.0,
         # 'FPKF(0.0) $\\alpha=0.1$ $\\beta=100.0$': 10779.820754702554,
@@ -90,7 +89,7 @@ TASK_METHOD_TO_LABEL_MAP = {
         # 'TDC(0) $\\alpha$=0.006 $\\mu$=16': 'TDC',
     },
     'boyan': {
-        'BBO': 'BBO',
+        'BBO-v2': 'BBO',
         'BRM': 'BRM',
         # 'BRMDS': 73.51348023353925,
         # 'FPKF(0.0) $\\alpha=0.01$ $\\beta=1000$': 273.5480269701192,
@@ -101,8 +100,8 @@ TASK_METHOD_TO_LABEL_MAP = {
         # 'KTD $\\eta$=0.001, $\\sigma^2$=0.001 $P_0$=1.0': 31.825294520747324,
         # 'LSPE(0.8) $\\alpha$=1.0': 25.61833224585434,
         # 'LSTD(0.0)': 32.224482273555594,
-        'LSTD(0.8)': 'LSTD (w/ reg.)',
-        'LSTD(0.8) $\\epsilon$=nan': 'LSTD (w/o reg.)',
+        'LSTD(0.8) $\\epsilon$=10000': 'LSTD+',
+        'LSTD(0.0) $\\epsilon$=nan': 'LSTD',
         # 'RG $\\alpha$=0.5': 753.8162545455252,
         # 'RG DS $\\alpha$=0.5': 834.6363948867928,
         # 'TD(0.0) $\\alpha$=aut.': 81.90041554133579,
@@ -111,7 +110,7 @@ TASK_METHOD_TO_LABEL_MAP = {
         'TDC(1.0) $\\alpha$=0.2 $\\mu$=0.0001': 'TDC',
     },
     'disc_random_off': {
-        'BBO': 'BBO',
+        'BBO-v2': 'BBO',
         'BRM': 'BRM',
         # 'BRMDS': 470.39077096883125,
         # 'FPKF(0.0) $\\alpha=0.01$ $\\beta=10.0$ m=500': 979.0994049523174,
@@ -120,8 +119,8 @@ TASK_METHOD_TO_LABEL_MAP = {
         # 'LSPE(0.0) $\\alpha$=0.001': 1059.184260076886,
         # 'LSPE(0.2)-CO $\\alpha$=0.01': 252.693201628713,
         # 'LSTD(0.0) $\\epsilon$=10': 'LSTD',
-        'LSTD-CO(0.0) $\\epsilon$=10': 'LSTD (w/ reg.)',
-        'LSTD(0.0) $\\epsilon$=nan': 'LSTD (w/o reg.)',
+        'LSTD-CO(0.0) $\\epsilon$=10': 'LSTD+',
+        'LSTD(0.0) $\\epsilon$=nan': 'LSTD',
         # 'LSTD-l1(0) $\\tau=0.0001$': 71.86247829537707,
         # 'LarsTD(0) $\\tau=0.05$': 104.1449172121861,
         # 'RG $\\alpha$=0.005': 442.84152418662165,
@@ -132,15 +131,15 @@ TASK_METHOD_TO_LABEL_MAP = {
         'TDC(0.0)-CO $\\alpha$=0.003 $\\mu$=0.05': 'TDC',
     },
     'disc_random_on': {
-        'BBO': 'BBO',
+        'BBO-v2': 'BBO',
         'BRM': 'BRM',
         # 'BRMDS': 257.107698326668,
         # 'FPKF(0.4) $\\alpha=0.5$ $\\beta=10.0$ m=1000': 646.5305920307188,
         # 'GTD $\\alpha$=0.007 $\\mu$=0.0001': 691.4351781077611,
         'GTD2 $\\alpha$=0.003 $\\mu$=4': 'GTD2',
         # 'LSPE(0.0) $\\alpha$=0.1': 43.95466968492962,
-        'LSTD(0.0) $\\epsilon$=10': 'LSTD (w/ reg.)',
-        'LSTD(0.0) $\\epsilon$=nan': 'LSTD (w/o reg.)',
+        'LSTD(0.0) $\\epsilon$=10': 'LSTD+',
+        'LSTD(0.0) $\\epsilon$=nan': 'LSTD',
         # 'LSTD-l1(0) $\\tau=3e-05$': 24.65568442748072,
         # 'LarsTD(0) $\\tau=0.05$': 110.65670906153218,
         # 'RG $\\alpha$=0.001': 716.0848732008917,
@@ -151,7 +150,7 @@ TASK_METHOD_TO_LABEL_MAP = {
         'TDC(0.0) $\\alpha$=0.007 $\\mu$=0.01': 'TDC',
     },
     'link20_imp_offpolicy': {
-        'BBO': 'BBO',
+        'BBO-v2': 'BBO',
         'BRM': 'BRM',
         # 'BRMDS': 7.671062088137126,
         # 'FPKF(0.0) $\\alpha$=0.3 $\\beta$=10.0 m=0.0': 8.082961359694492,
@@ -161,8 +160,8 @@ TASK_METHOD_TO_LABEL_MAP = {
         # 'LSPE(0.0) $\\alpha$=0.01': 8.082953203055869,
         # 'LSPE(0.0)-CO $\\alpha$=0.5': 5.357474509572003,
         # 'LSTD(0.0) $\\epsilon$=100': 8.082953064992447,
-        'LSTD(0.0)-CO $\\epsilon$=10': 'LSTD (w/ reg.)',
-        'LSTD(0.0) $\\epsilon$=nan': 'LSTD (w/o reg.)',
+        'LSTD(0.0)-CO $\\epsilon$=10': 'LSTD+',
+        'LSTD(0.0) $\\epsilon$=nan': 'LSTD',
         # 'RG $\\alpha$=0.04': 7.778383923537741,
         # 'RG DS $\\alpha$=0.05': 7.656775335176597,
         'TD(0.0) $\\alpha$=0.05': 'TD',
@@ -170,15 +169,15 @@ TASK_METHOD_TO_LABEL_MAP = {
         'TDC(0.0) $\\alpha$=0.05 $\\mu$=0.01': 'TDC',
     },
     'link20_imp_onpolicy': {
-        'BBO': 'BBO',
+        'BBO-v2': 'BBO',
         'BRM': 'BRM',
         # 'BRMDS': 7.448412809781189,
         # 'FPKF(0.2) $\\alpha$=0.0005': 7.3029097916889505,
         # 'GTD $\\alpha$=0.0005 $\\mu$=2.0': 4.285696333769541,
         'GTD2 $\\alpha$=0.0005 $\\mu$=1.0': 'GTD2',
         # 'LSPE(0.0) $\\alpha$=0.01': 4.263460657693718,
-        'LSTD(0.0) $\\epsilon$=0.01': 'LSTD (w/ reg.)',
-        'LSTD(0.0) $\\epsilon$=nan': 'LSTD (w/o reg.)',
+        'LSTD(0.0) $\\epsilon$=0.01': 'LSTD+',
+        'LSTD(0.0) $\\epsilon$=nan': 'LSTD',
         # 'RG $\\alpha$=0.003': 7.5978241252189935,
         # 'RG DS $\\alpha$=0.0005': 7.436269227775181,
         'TD(0.0) $\\alpha$=0.0005': 'TD',
@@ -186,7 +185,7 @@ TASK_METHOD_TO_LABEL_MAP = {
         'TDC(0.0) $\\alpha$=0.0005 $\\mu$=0.05': 'TDC',
     },
     'lqr_full_offpolicy': {
-        'BBO': 'BBO',
+        'BBO-v2': 'BBO',
         'BRM': 'BRM',
         # 'BRMDS': 155.45184006601957,
         # 'FPKF(0.4) $\\alpha$=1.0': 251.37685915148825,
@@ -195,8 +194,8 @@ TASK_METHOD_TO_LABEL_MAP = {
         # 'LSPE(0.0) $\\alpha$=0.001': 181.05705256200315,
         # 'LSPE(0.0)-TO $\\alpha$=1.0': 41673.59399231003,
         # 'LSTD(0.0) $\\epsilon$=0.01': 274.21751459268353,
-        'LSTD-TO(0.0) $\\epsilon$=10': 'LSTD (w/ reg.)',
-        'LSTD(0.0) $\\epsilon$=nan': 'LSTD (w/o reg.)',
+        'LSTD-TO(0.0) $\\epsilon$=10': 'LSTD+',
+        'LSTD(0.0) $\\epsilon$=nan': 'LSTD',
         # 'RG $\\alpha$=0.005': 232.04381572684196,
         # 'RG DS $\\alpha$=0.008': 163.44589125291552,
         # 'TD(0.0) $\\alpha$=RMAlpha(0.03, 0.25)': 'TD',
@@ -205,15 +204,15 @@ TASK_METHOD_TO_LABEL_MAP = {
         # 'TDC(0.2) $\\alpha$=0.002 $\\mu$=0.05': 'TDC',
     },
     'lqr_full_onpolicy': {
-        'BBO': 'BBO',
+        'BBO-v2': 'BBO',
         'BRM': 'BRM',
         # 'BRMDS': 42.83952114202071,
         # 'FPKF(0.8) $\\alpha$=0.5': 28.732748800889972,
         # 'GTD $\\alpha$=0.0005 $\\mu$=0.001': 163.8951239774888,
         'GTD2 $\\alpha$=0.005 $\\mu$=0.5': 'GTD2',
         # 'LSPE(0.0) $\\alpha$=0.1': 13.695198417158917,
-        'LSTD(0.0) $\\epsilon$=10': 'LSTD (w/ reg.)',
-        'LSTD(0.0) $\\epsilon$=nan': 'LSTD (w/o reg.)',
+        'LSTD(0.0) $\\epsilon$=10': 'LSTD+',
+        'LSTD(0.0) $\\epsilon$=nan': 'LSTD',
         # 'RG $\\alpha$=0.01': 115.33997003792499,
         # 'RG DS $\\alpha$=0.02': 73.41508560079738,
         # 'TD(0.0) $\\alpha$=RMAlpha(0.01, 0.05)': 'TD',
@@ -221,7 +220,7 @@ TASK_METHOD_TO_LABEL_MAP = {
         'TDC(0.0) $\\alpha$=0.007 $\\mu$=0.05': 'TDC',
     },
     'lqr_imp_offpolicy': {
-        'BBO': 'BBO',
+        'BBO-v2': 'BBO',
         'BRM': 'BRM',
         # 'BRMDS': 386.22685365261174,
         # 'FPKF(0.2) $\\alpha$=0.3': 334.5631079389631,
@@ -230,8 +229,8 @@ TASK_METHOD_TO_LABEL_MAP = {
         # 'LSPE(0.0) $\\alpha$=0.001': 332.5518261902775,
         # 'LSPE(0.0)-CO $\\alpha$=0.7': 254.9669229432863,
         # 'LSTD(0.0) $\\epsilon$=0.01': 3218.2376092405575,
-        'LSTD-CO(0.0) $\\epsilon$=100000': 'LSTD (w/ reg.)',
-        'LSTD(0.0) $\\epsilon$=nan': 'LSTD (w/o reg.)',
+        'LSTD-CO(0.0) $\\epsilon$=100000': 'LSTD+',
+        'LSTD(0.0) $\\epsilon$=nan': 'LSTD',
         # 'RG $\\alpha$=0.005': 462.20928631270107,
         # 'RG DS $\\alpha$=0.006': 417.41225318123463,
         'TD(0.0) $\\alpha$=0.002': 'TD',
@@ -239,7 +238,7 @@ TASK_METHOD_TO_LABEL_MAP = {
         'TDC(0.0) $\\alpha$=0.002 $\\mu$=0.0001': 'TDC',
     },
     'lqr_imp_onpolicy': {
-        'BBO': 'BBO',
+        'BBO-v2': 'BBO',
         # 'BRM': 'BRM',
         'BRM(0.8)': 'BRM',
         # 'BRMDS': 116.87172908094459,
@@ -247,8 +246,8 @@ TASK_METHOD_TO_LABEL_MAP = {
         # 'GTD $\\alpha$=0.009 $\\mu$=0.1': 88.75582867874991,
         'GTD2 $\\alpha$=0.02 $\\mu$=0.1': 'GTD2',
         # 'LSPE(0.0) $\\alpha$=0.9': 81.55938521992812,
-        'LSTD(0.0) $\\epsilon$=100000': 'LSTD (w/ reg.)',
-        'LSTD(0.0) $\\epsilon$=nan': 'LSTD (w/o reg.)',
+        'LSTD(0.0) $\\epsilon$=100000': 'LSTD+',
+        'LSTD(0.0) $\\epsilon$=nan': 'LSTD',
         # 'RG $\\alpha$=0.06': 134.75149275892065,
         # 'RG DS $\\alpha$=0.06': 116.61673543972402,
         'TD(0.0) $\\alpha$=0.004': 'TD',
@@ -346,17 +345,31 @@ print(sum_rmse_dataframe)
 
 WARN_BAIRD = "\kh{Probably want to drop the Baird experiment since its solution is the same as the prior for many of the methods.} "
 
+SYMBOL_CAPTION = ", ".join((
+    '$\\oplus$=on-policy',
+    '$\\ominus$=off-policy',
+    '$\\dag$=perfect features',
+    '$\\ddag$=impoverished features',
+)) + "."
 FINAL_RMSE_CAPTION = (
     f"MSE of final predictions. The values for all methods"
     " except for BBO are obtained with code provided by~\cite{dann2014policy}."
+    + f" {SYMBOL_CAPTION}"
 )
 
 SUM_RMSE_CAPTION = (
     f"Sum of square root MSE over all timesteps. The values for all methods"
     " except for BBO are obtained with code provided by~\cite{dann2014policy}."
+    + f" {SYMBOL_CAPTION}"
 )
 
 print(to_latex_final_rmse_dataframe.to_latex(
-    escape=False, caption=FINAL_RMSE_CAPTION))
+    escape=False,
+    caption=FINAL_RMSE_CAPTION,
+    label="tab:linear_policy_evaluation_final_MSE",
+))
 print(to_latex_sum_rmse_dataframe.to_latex(
-    escape=False, caption=SUM_RMSE_CAPTION))
+    escape=False,
+    caption=SUM_RMSE_CAPTION,
+    label="tab:linear_policy_evaluation_sum_RMSE",
+))
