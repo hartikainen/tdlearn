@@ -34,6 +34,9 @@ from .create_tables import (
 # }
 
 
+FIGURE_TYPE = 'full'
+
+
 def plot_task(task_dataframe, metric_to_use, axis, labels, legend=False):
     try:
         assert set(labels) == set(task_dataframe['method'].unique())
@@ -106,22 +109,40 @@ def plot(dataframes_by_task):
 
     num_subplots = len(task_ids)
     default_figsize = np.array(plt.rcParams.get('figure.figsize'))
-    figure_scale = 0.44
+    figure_scale = 0.51
 
-    num_subplots_per_side = int(np.ceil(np.sqrt(num_subplots)))
-    subplots_shape = (num_subplots_per_side, num_subplots_per_side)
+    if FIGURE_TYPE == 'small':
+        subplots_shape = (1, num_subplots)
 
-    # subplots_shape = (1, num_subplots)
+        default_figsize = plt.rcParams.get('figure.figsize')
+        # figsize = np.array((num_subplots, 0.4)) * np.max(default_figsize[0] * figure_scale)
+        figsize = np.array((
+            0.9 * num_subplots, 0.4)) * np.max(default_figsize[0] * figure_scale)
 
-    # figure_scale = 0.5
-    # figsize = np.array((num_subplots, 0.5)) * np.max(default_figsize[0] * figure_scale)
+        # figsize = np.array((num_subplots, 0.5)) * np.max(default_figsize[0] * figure_scale)
+        # figsize = (
+        #     np.array((0.88, 0.6))
+        #     # np.array((0.75, 0.55))
+        #     * np.array(subplots_shape[::-1])
+        #     # * np.array((3, 0.4))
+        #     * np.max(default_figsize[0] * figure_scale))
 
-    figsize = (
-        np.array((1, 0.8))
-        # np.array((0.75, 0.55))
-        * np.array(subplots_shape[::-1])
-        # * np.array((3, 0.4))
-        * np.max(default_figsize[0] * figure_scale))
+        # figsize = (
+        #     np.array((1, 0.4))
+        #     # np.array((0.75, 0.55))
+        #     * np.array(subplots_shape[::-1])
+        #     # * np.array((3, 0.4))
+        #     * np.max(default_figsize[0] * figure_scale))
+    else:
+        num_subplots_per_side = int(np.ceil(np.sqrt(num_subplots)))
+        subplots_shape = (num_subplots_per_side, num_subplots_per_side)
+
+        figsize = (
+            np.array((1, 0.5))
+            # np.array((0.75, 0.55))
+            * np.array(subplots_shape[::-1])
+            # * np.array((3, 0.4))
+            * np.max(default_figsize[0] * figure_scale))
 
     figure, axes = plt.subplots(
         *subplots_shape,
@@ -132,6 +153,7 @@ def plot(dataframes_by_task):
         #     # 'hspace': 0
         # },
     )
+
     axes = np.atleast_2d(axes)
 
     save_dir = Path('/tmp/bbo/').expanduser()
@@ -168,15 +190,21 @@ def plot(dataframes_by_task):
 
         axis.get_legend().remove()
 
+        title_text = (TASK_TO_INDEX_MAP[task_id]
+                      .replace('On-pol.', '$\\oplus$')
+                      .replace('Off-pol.', '$\\ominus$')
+                      .replace('Perf. Feat.', '$\\dag$')
+                      .replace('Imp. Feat.', '$\\ddag$')
+                      .replace(', ', ','))
+
+        if FIGURE_TYPE == 'small':
+            title_text = title_text.split(' (')[0]
+
         title = axis.set_title(
-            TASK_TO_INDEX_MAP[task_id]
-            .replace('On-pol.', '$\\oplus$')
-            .replace('Off-pol.', '$\\ominus$')
-            .replace('Perf. Feat.', '$\\dag$')
-            .replace('Imp. Feat.', '$\\ddag$')
-            .replace(', ', ','),
+            title_text,
             # pad=30,
-            fontsize='medium')
+            # fontsize='medium',
+        )
         titles.append(title)
 
         if i == axes.shape[0] - 1:
@@ -193,7 +221,7 @@ def plot(dataframes_by_task):
             if metric_to_use == 'RMSE':
                 axis.set_ylabel(
                     '$\sqrt{MSE}$',
-                    labelpad=10,
+                    # labelpad=10,
                     # fontsize='large',
                     # fontweight='bold',
                 )
@@ -222,83 +250,86 @@ def plot(dataframes_by_task):
     handles = (handles[-1], *handles[1:-1])
     labels = (labels[-1], *labels[1:-1])
 
-    extra_legend_handles = (
-        Line2D(
-            [],
-            [],
-            marker=r'$\oplus$',
-            linestyle='none',
-            color='black',
-            label='on-policy',
-            # markerfacecolor='black',
-            markersize=12,
-            markeredgewidth=0.0,
-            # markersize='medium',
-        ),
-        Line2D(
-            [],
-            [],
-            marker=r'$\ominus$',
-            linestyle='none',
-            color='black',
-            label='off-policy',
-            # markerfacecolor='black',
-            markersize=12,
-            markeredgewidth=0.0,
-            # markersize='medium',
-        ),
-        Line2D(
-            [],
-            [],
-            marker=r'$\dag$',
-            linestyle='none',
-            color='black',
-            label='perfect features',
-            # markerfacecolor='black',
-            markersize=12,
-            markeredgewidth=0.0,
-            # markersize='medium',
-        ),
-        Line2D(
-            [],
-            [],
-            marker=r'$\ddag$',
-            linestyle='none',
-            color='black',
-            label='impoverished features',
-            # markerfacecolor='black',
-            markersize=12,
-            markeredgewidth=0.0,
-            # markersize='medium',
-        ),
-    )
-    handles = (
-        *handles,
-    )
-    labels = (
-        *labels,
-    )
-    extra_legend = plt.legend(
-        handles=extra_legend_handles,
-        ncol=4,
+    if FIGURE_TYPE == 'small':
+        extra_legend = None
+    else:
+        extra_legend_handles = (
+            Line2D(
+                [],
+                [],
+                marker=r'$\oplus$',
+                linestyle='none',
+                color='black',
+                label='on-policy',
+                # markerfacecolor='black',
+                markersize=12,
+                markeredgewidth=0.0,
+                # markersize='medium',
+            ),
+            Line2D(
+                [],
+                [],
+                marker=r'$\ominus$',
+                linestyle='none',
+                color='black',
+                label='off-policy',
+                # markerfacecolor='black',
+                markersize=12,
+                markeredgewidth=0.0,
+                # markersize='medium',
+            ),
+            Line2D(
+                [],
+                [],
+                marker=r'$\dag$',
+                linestyle='none',
+                color='black',
+                label='perfect features',
+                # markerfacecolor='black',
+                markersize=12,
+                markeredgewidth=0.0,
+                # markersize='medium',
+            ),
+            Line2D(
+                [],
+                [],
+                marker=r'$\ddag$',
+                linestyle='none',
+                color='black',
+                label='impoverished features',
+                # markerfacecolor='black',
+                markersize=12,
+                markeredgewidth=0.0,
+                # markersize='medium',
+            ),
+        )
+        handles = (
+            *handles,
+        )
+        labels = (
+            *labels,
+        )
+        extra_legend = plt.legend(
+            handles=extra_legend_handles,
+            ncol=4,
 
-        handlelength=1.25,
-        handletextpad=0.25,
-        # labelspacing=0,
-        columnspacing=1.25,
-        # loc='best',
+            handlelength=1.25,
+            handletextpad=0.25,
+            # labelspacing=0,
+            columnspacing=1.25,
+            # loc='best',
 
-        loc='lower center',
-        bbox_to_anchor=(0.5, 1.0),
-        bbox_transform=figure.transFigure,
+            loc='lower center',
+            bbox_to_anchor=(0.5, 1.0),
+            bbox_transform=figure.transFigure,
 
-        # loc='lower center',
-        # bbox_to_anchor=(0.5, 1.0),
-        # fontsize='large'
-        fontsize='medium'
-    )
-    extra_legend.set_in_layout(False)
-    figure.add_artist(extra_legend)
+            # loc='lower center',
+            # bbox_to_anchor=(0.5, 1.0),
+            # fontsize='large'
+            fontsize='medium'
+        )
+        extra_legend.set_in_layout(True)
+        figure.add_artist(extra_legend)
 
     legend = figure.legend(
         handles=handles,
@@ -313,7 +344,11 @@ def plot(dataframes_by_task):
         # loc='best',
 
         loc='lower center',
-        bbox_to_anchor=(0.5, 1.05),
+        bbox_to_anchor=(
+            (0.475, 1.03)
+            if FIGURE_TYPE == 'small'
+            else (0.5, 1.05)
+        ),
         bbox_transform=figure.transFigure,
 
         # loc='lower center',
@@ -322,18 +357,22 @@ def plot(dataframes_by_task):
         fontsize='medium'
     )
 
-    legend.set_in_layout(False)
+    legend.set_in_layout(True)
+
+    bbox_extra_artists = (*titles, legend, extra_legend)
+    bbox_extra_artists = type(bbox_extra_artists)(
+        x for x in bbox_extra_artists if x is not None)
 
     figure.canvas.draw()
-    plt.tight_layout()
-    figure.set_constrained_layout(False)
+    # plt.tight_layout()
+    # figure.set_constrained_layout(False)
     plt.savefig(
         # os.path.join(result._experiment_dir, 'result.pdf'),
         save_dir / 'result.pdf',
         # bbox_extra_artists=(legend_1, legend_2),
         # bbox_extra_artists=(legend_2, ),
 
-        bbox_extra_artists=(*titles, legend, extra_legend),
+        bbox_extra_artists=bbox_extra_artists,
         # bbox_extra_artists=(legend, extra_legend),
         # bbox_extra_artists=(*titles, legend,),
         # bbox_extra_artists=(*titles, ),
@@ -347,7 +386,7 @@ def plot(dataframes_by_task):
         # bbox_extra_artists=(legend_1, legend_2),
         # bbox_extra_artists=(legend_2, ),
 
-        bbox_extra_artists=(*titles, legend, extra_legend),
+        bbox_extra_artists=bbox_extra_artists,
         # bbox_extra_artists=(legend, extra_legend),
         # bbox_extra_artists=(*titles, legend),
         # bbox_extra_artists=(*titles, ),
